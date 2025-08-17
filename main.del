@@ -18,6 +18,7 @@ import "src/hud/scoreboard.del";
 import "src/hud/textColor.del";
 import "src/hud/heroInfo.del";
 import "src/hud/ready.del";
+import "src/hud/round.del";
 import "src/hud/main.del";
 import "src/game.del";
 import "src/player.del";

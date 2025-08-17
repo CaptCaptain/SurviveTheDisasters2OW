@@ -12,6 +12,8 @@ globalvar Number disasterNameStringIndex;
 globalvar String disasterNameString;
 globalvar String[] disasterNames;
 globalvar GameState currentGameState = GameState.WAITING_FOR_PLAYERS;
+globalvar Number currentRound = 0;
+globalvar Number maxRounds = 20;
 
 void updateDisasterString(in String[] names) {
     disasterNames = names;
@@ -46,6 +48,7 @@ class Game {
 
     public static void breakTime() {
         currentGameState = GameState.BREAK_TIME;
+        currentRound += 1;
         HeroInfo.showInfo();
         SetTeamScore(Team.Team2, 20);
         WaitUntil(IsGameInProgress(), 9999);
@@ -58,6 +61,7 @@ class Game {
 
     public static void intermission() {
         currentGameState = GameState.INTERMISSION;
+        currentRound += 1;
         HeroInfo.showInfo();
         WaitUntil(IsGameInProgress(), 9999);
         Hud.updateDescription("Next Disaster In");
