@@ -1,0 +1,31 @@
+{
+    "Lobby": {
+        "Max Team 1 Players": 6,
+        "Max Team 2 Players": 0
+    },
+    "Mode Name": "Survive the Disasters 2 (EN)",
+    "Description": "",
+    "Modes": {
+        "Team Deathmatch": {
+            "Enabled Maps": ["Temple of Anubis"],
+            "Enable Perks": true,
+            "Score To Win": 1
+        }
+    },
+    "Heroes": {
+        "Team 1": {
+            "Mercy": {
+                "Resurrect Cooldown Time": 50
+            },
+            "Baptiste": {
+                "Immortality Field Cooldown Time": 50
+            },
+            "Lifeweaver": {
+                "Life Grip Cooldown Time": 75
+            }
+        }
+    },
+    "Extensions": {
+        "Spawn More Dummy Bots": true
+    }
+}

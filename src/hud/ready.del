@@ -1,0 +1,70 @@
+playervar Boolean isReady;
+
+globalvar Number readyStartTime;
+globalvar Number[] readyTextIds = [];
+globalvar Number readyUpIndex;
+
+class ReadyUp {
+    public static void setReady(Player player = EventPlayer(), Boolean ready) {
+        player.isReady = ready;
+    }
+
+    public static Boolean allPlayersReady(): AllPlayers(Team.Team1).All(element => element.isReady);
+
+    public static Number numberOfPlayersReady(): CountOf(AllPlayers(Team.Team1).Filter(element => element.isReady));
+
+    public static void start() {
+        readyStartTime = TotalTimeElapsed();
+        AllPlayers().isReady = false;
+        LastCreated.wrap(()=>{
+            CreateHudText(LocalPlayer().isReady ? LocalPlayer() : [], "{0} Ready [{1}/{2}]".Format([TX.getString("C00000000005A0E"), ReadyUp.numberOfPlayersReady(), NumberOfPlayers(Team.Team1)]), EvaluateOnce(""), EvaluateOnce(""), Location.Top, 2, EvaluateOnce(Color.LimeGreen), EvaluateOnce(Color.White), EvaluateOnce(Color.White), HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
+        }, LastTextID(), readyTextIds);
+        LastCreated.wrap(()=>{
+            CreateHudText(LocalPlayer().isReady ? [] : LocalPlayer(), "{0} Not Ready [{1}/{2}]".Format([TX.getString("C0000000002A9F9"), ReadyUp.numberOfPlayersReady(), NumberOfPlayers(Team.Team1)]), EvaluateOnce(""), EvaluateOnce(""), Location.Top, 2, EvaluateOnce(Color.Red), EvaluateOnce(Color.White), EvaluateOnce(Color.White), HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
+        }, LastTextID(), readyTextIds);
+        LastCreated.wrap(()=>{
+            CreateHudText(LocalPlayer().isReady ? [] : LocalPlayer(), EvaluateOnce(""), "Hold [{0}]".Format([InputBindingString(Button.Reload)]), EvaluateOnce(""), Location.Top, 2, EvaluateOnce(Color.White), EvaluateOnce(Color.White), EvaluateOnce(Color.White), HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
+        }, LastTextID(), readyTextIds);
+    }
+
+    public static void end() {
+        AllPlayers().isReady = true;
+        for (readyUpIndex = 0; CountOf(readyTextIds); 1) {
+            DestroyHudText(readyTextIds[readyUpIndex]);
+        }
+        readyTextIds = [];
+    }
+}
+
+rule: '[ready.del] Player Ready Up'
+Event.OngoingPlayer
+Team.Team1
+Player.All
+if (!EventPlayer().isReady)
+if (IsButtonHeld(EventPlayer(), Button.Reload))
+{
+    Wait(0.5, WaitBehavior.AbortWhenFalse);
+    
+    ReadyUp.setReady(EventPlayer(), true);
+    Communicate(EventPlayer(), Communication.Ready);
+}
+
+rule: '[ready.del] Bots Auto Ready'
+Event.OnPlayerJoin
+Team.Team1
+{
+    StartForcingDummyBotName(EventPlayer(),"-");
+
+    Wait(0.016);
+
+    if ("{0}".Format([EventPlayer()]) != "-") return;
+
+    StopForcingDummyBotName(EventPlayer());
+
+    while (true) {
+        WaitUntil(!EventPlayer().isReady, 9999);
+        WaitUntil(currentGameState == GameState.BREAK_TIME || currentGameState == GameState.INTERMISSION, 9999);
+        EventPlayer().isReady = true;
+        Wait(0.016);
+    }
+}

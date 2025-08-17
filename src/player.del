@@ -1,0 +1,5 @@
+rule: '[player.del] Setup Player'
+Event.OngoingPlayer Team.Team1
+{
+    DisableGameModeHud();
+}

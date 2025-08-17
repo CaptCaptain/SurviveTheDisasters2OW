@@ -1,0 +1,61 @@
+String formatObjectiveTypeString(in String string) {
+    return "\n      {0}     \n".Format([string]);
+}
+
+String formatObjectiveNameString(in String string) {
+    return "\n      {0}     \n".Format([string]);
+}
+
+globalvar String objectiveName = "";
+globalvar String objectiveDescription = "Waiting for Players";
+globalvar String objectiveType = "";
+globalvar Color objectiveColor = Color.White;
+globalvar Number objectiveTimer = 69;
+
+class Hud {
+    public static void setup() {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce(""), objectiveDescription, Location.Top, 0, Color.White);
+        CreateHudText(AllPlayers(), objectiveTimer, EvaluateOnce(""), EvaluateOnce(""), Location.Top, 1, Color.White);
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce(""), EvaluateOnce("\n\n\n"), Location.Top, 2, Color.White);
+        // CreateHudText(AllPlayers(), objectiveType, EvaluateOnce(""), EvaluateOnce(""), Location.Top, 3, Color.White);
+        CreateHudText(AllPlayers(), objectiveName, EvaluateOnce(""), EvaluateOnce(""), Location.Top, 3, objectiveColor, Color.White, Color.White, HudTextRev.VisibleToStringAndColor);
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce(" "), objectiveType, Location.Top, 4, Color.White, Color.White, Color.White, HudTextRev.VisibleToStringAndColor);
+    }
+
+    public static void updateName(in String name) {
+        objectiveName = name;
+    }
+
+    public static void updateTimer(in Number value) {
+        objectiveTimer = value;
+    }
+
+    public static void updateTimerString(in String value) {
+        objectiveTimer = value;
+    }
+
+    public static void updateDescription(in String description) {
+        objectiveDescription = description;
+    }
+
+    public static void updateType(in String type) {
+        objectiveType = type;
+    }
+
+    public static void updateColor(in Color color) {
+        objectiveColor = color;
+    }
+}
+
+rule: '[hud.del] Setup Hud'
+{
+    Hud.setup();
+}
+
+rule: '[hud.del] Update Objective Timer'
+{
+    WaitUntil(currentGameState != GameState.IN_BETWEEN, 9999);
+    Hud.updateTimer(RoundToInteger(MatchTime(), Rounding.Nearest));
+    WaitUntil(MatchTime() != EvaluateOnce(MatchTime()), 1);
+    Loop();
+}

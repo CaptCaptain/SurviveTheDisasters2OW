@@ -1,0 +1,23 @@
+import "settings.lobby.json";
+import "src/math.del";
+import "src/txBypass.del";
+import "src/text.del";
+import "src/lastCreated.del";
+import "src/spawns.del";
+
+import "src/enemy/stateMachine.del";
+import "src/enemy/main.del";
+
+import "src/disasters/main.del";
+// import "src/disasters/nuclearBomb.del";
+// import "src/disasters/wave.del";
+// import "src/disasters/rain.del";
+import "src/disasters/bountyHunter.del";
+
+import "src/hud/scoreboard.del";
+import "src/hud/textColor.del";
+import "src/hud/heroInfo.del";
+import "src/hud/ready.del";
+import "src/hud/main.del";
+import "src/game.del";
+import "src/player.del";

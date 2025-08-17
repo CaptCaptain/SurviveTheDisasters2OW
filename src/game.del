@@ -1,0 +1,135 @@
+enum GameState {
+    WAITING_FOR_PLAYERS,
+    BREAK_TIME,
+    INTERMISSION,
+    IN_BETWEEN,
+    ROUND
+}
+
+globalvar DisasterData selectedDisaster;
+globalvar Number disasterSelectIndex;
+globalvar Number disasterNameStringIndex;
+globalvar String disasterNameString;
+globalvar String[] disasterNames;
+globalvar GameState currentGameState = GameState.WAITING_FOR_PLAYERS;
+
+void updateDisasterString(in String[] names) {
+    disasterNames = names;
+    updateDisasterString();
+}
+
+void updateDisasterString() "[game.del] Subroutine updateDisasterString" {
+    if (CountOf(disasterNames) <= 1) {
+        disasterNameString = disasterNames[0];
+        return;
+    }
+    for (disasterNameStringIndex = 0; disasterNameStringIndex < CountOf(disasterNames) - 1; disasterNameStringIndex++) {
+        disasterNameString = disasterNameString + ", " + disasterNames[disasterNameStringIndex];
+    }
+    disasterNameString = disasterNameString + ", and " + disasterNames[CountOf(disasterNames)];
+    return;
+}
+
+class Game {
+    public static void setup() {
+        DisableCompletion();
+        DisableAnnouncer();
+        while (IsWaitingForPlayers())
+        {
+            StartGameMode();
+            Wait(0.016);
+        }
+        SetMatchTime(15);
+        StartDamageModification(AllPlayers(Team.Team1), AllPlayers(Team.Team2), 50, DamageModificationRev.ReceiversAndDamagers);
+        disasterSelectIndex = 0;
+    }
+
+    public static void breakTime() {
+        currentGameState = GameState.BREAK_TIME;
+        HeroInfo.showInfo();
+        SetTeamScore(Team.Team2, 20);
+        WaitUntil(IsGameInProgress(), 9999);
+        Hud.updateDescription("Get Ready");
+        SetMatchTime(45);
+        Wait(0.016);
+        ReadyUp.start();
+        WaitUntil(MatchTime() <= 0, 9999);
+    }
+
+    public static void intermission() {
+        currentGameState = GameState.INTERMISSION;
+        HeroInfo.showInfo();
+        WaitUntil(IsGameInProgress(), 9999);
+        Hud.updateDescription("Next Disaster In");
+        SetMatchTime(30);
+        Wait(0.016);
+        ReadyUp.start();
+        WaitUntil(MatchTime() <= 0, 9999);
+    }
+
+    public static void results() {
+        currentGameState = GameState.IN_BETWEEN;
+
+        Hud.updateDescription("Results");
+        Hud.updateTimerString("");
+
+        BigMessage(AllLivingPlayers(Team.Team1), "Survived!");
+
+        // Local Player does not work with PlayEffect
+        PlayEffect(PlayersInSlot(0, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(0, Team.Team1).Position(), 10000);
+        PlayEffect(PlayersInSlot(1, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(1, Team.Team1).Position(), 10000);
+        PlayEffect(PlayersInSlot(2, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(2, Team.Team1).Position(), 10000);
+        PlayEffect(PlayersInSlot(3, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(3, Team.Team1).Position(), 10000);
+        PlayEffect(PlayersInSlot(4, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(4, Team.Team1).Position(), 10000);
+        PlayEffect(PlayersInSlot(5, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(5, Team.Team1).Position(), 10000);
+
+        Wait(3);
+    }
+
+    public static void startRound() {
+        currentGameState = GameState.IN_BETWEEN;
+        ReadyUp.end();
+        HeroInfo.hideInfo();
+        Hud.updateDescription("");
+        Hud.updateTimerString("");
+        selectedDisaster = Disasters.getDisaster(disasterPool[disasterSelectIndex]);
+        Disasters.addDisaster(selectedDisaster);
+        Disasters.displayDisasters();
+        updateDisasterString([selectedDisaster.name]);
+
+        currentGameState = GameState.ROUND;
+        Hud.updateDescription(disasterNameString);
+        Disasters.startDisaster();
+        SetMatchTime(selectedDisaster.duration);
+        Wait(0.016);
+        WaitUntil(MatchTime() <= 0, 9999);
+        disasterSelectIndex += 1;
+
+        if (disasterSelectIndex >= CountOf(disasterPool)) {
+            disasterSelectIndex = 0;
+        }
+    }
+}
+
+rule: '[game.del] Setup Game'
+{
+    Game.setup();
+    Game.breakTime();
+    while (true) {
+        Game.startRound();
+        Disasters.endDisaster();
+        Game.results();
+        Game.intermission();
+        Wait(0.016);
+    }
+}
+
+rule: '[game.del] Reduce Timer If Player Readies Up'
+{
+    WaitUntil(currentGameState == GameState.BREAK_TIME || currentGameState == GameState.INTERMISSION, 9999);
+    WaitUntil(ReadyUp.numberOfPlayersReady() != EvaluateOnce(ReadyUp.numberOfPlayersReady()), 9999);
+    if (ReadyUp.numberOfPlayersReady() >= NumberOfPlayers(Team.Team1)) SetMatchTime(Max(3, MatchTime() / 2));
+    if (ReadyUp.allPlayersReady()) SetMatchTime(3);
+    Wait(0.016);
+    Loop();
+}

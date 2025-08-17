@@ -1,0 +1,124 @@
+enum BotState { NULL, IDLE, ATTACKING, SPAWNING, DEAD }
+enum BotEvent { NULL, ENEMY_LOCATED, ENEMY_LOST }
+
+single struct Bot {
+    public Player target;
+    public Vector[] possibleDirections;
+
+    public static void setTarget(in Player player = EventPlayer(), in Player target) {
+        player.bot.target = target;
+    }
+    public static Player getTarget(in Player player = EventPlayer()) {
+        return player.bot.target;
+    }
+
+    public static Vector[] allDirections = [Forward(), Backward(), Left(), Right(), Left() + Forward(), Left() + Backward(), Right() + Forward(), Right() + Backward()];
+    public static void setPossibleDirections(in Player player = EventPlayer(), in Any value) {
+        player.bot.possibleDirections = value;
+    }
+    public static Vector[] getPossibleDirections(in Player player = EventPlayer()) {
+        return player.bot.possibleDirections;
+    }
+
+    public static Bot New(): {target: null, possibleDirections: []};
+}
+
+void handleEvent() "[enemy/main.del] Subroutine handleEvent" {
+    switch (botState.getState()) {
+        case BotState.IDLE:
+            handleIdleState();
+            break;
+        case BotState.ATTACKING:
+            handleAttackingState();
+            break;
+        case BotState.DEAD:
+            handleDeadState();
+            break;
+    }
+}
+
+void handleIdleState() "[enemy/main.del] Subroutine handleIdleState" {
+    switch(botState.getEvent()) {
+        case BotEvent.NULL:
+            Bot.setTarget(EventPlayer(), PlayersWithinRadius(EventPlayer().EyePosition(), 100, Team.Team1, RadiusLOS.Off).Sort((Player)=>DistanceBetween(PositionOf(Player), EventPlayer().Position())).Remove(AllDeadPlayers()).First);
+
+            if (EntityExists(Bot.getTarget())) StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: BotEvent.ENEMY_LOCATED);
+            else StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: BotEvent.ENEMY_LOST);
+
+            break;
+        case BotEvent.ENEMY_LOCATED:
+            StateMachine<BotState, BotEvent>.setState(EventPlayer().botState, BotState.ATTACKING);
+            StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: BotEvent.ENEMY_LOCATED);
+            break;
+        case BotEvent.ENEMY_LOST:
+            StopFacing(EventPlayer());
+            StopThrottleInDirection(EventPlayer());
+            break;
+    }
+}
+
+void handleAttackingState() "[enemy/main.del] Subroutine handleAttackingState" {
+    switch (EventPlayer().botState.getEvent()) {
+        case BotEvent.NULL:
+            if (EntityExists(Bot.getTarget()) && IsDead(Bot.getTarget())) StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: BotEvent.ENEMY_LOST);
+            else if (!EntityExists(Bot.getTarget())) StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: BotEvent.ENEMY_LOST);
+            else if (EntityExists(Bot.getTarget()) && !IsInLineOfSight(EventPlayer().EyePosition(), Bot.getTarget().EyePosition(), BarrierLOS.NoBarriersBlock) && IsInLineOfSight(EventPlayer().EyePosition(), ClosestPlayerTo(EventPlayer().EyePosition(), Team.Team1).EyePosition(), BarrierLOS.NoBarriersBlock) && ClosestPlayerTo(EventPlayer().EyePosition(), Team.Team1).IsAlive())
+                Bot.setTarget(target: ClosestPlayerTo(EventPlayer(), Team.Team1));
+            else if (EntityExists(Bot.getTarget()) && (IsInLineOfSight(EventPlayer().EyePosition(), Bot.getTarget().EyePosition(), BarrierLOS.NoBarriersBlock) || DistanceBetween(EventPlayer().Position(), Bot.getTarget().Position()) < 100)) StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: BotEvent.ENEMY_LOCATED);
+            else StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: BotEvent.ENEMY_LOST);
+
+            break;
+        case BotEvent.ENEMY_LOCATED:
+            StartFacing(EventPlayer(), DirectionTowards(EventPlayer().EyePosition(), Bot.getTarget().EyePosition()), 500, Relative.ToWorld);
+            
+            Bot.setPossibleDirections(EventPlayer(), Bot.allDirections.Sort(
+            (Direction)=>
+                DotProduct(Direction, DirectionTowards(EventPlayer().Position(), Bot.getTarget().Position())) *
+                (
+                    IsInLineOfSight(EventPlayer().Position() + Up(), EventPlayer().Position() + Up() + (Direction * 2)) &&
+                    DistanceBetween(Bot.getTarget().Position(), EventPlayer().Position() + Direction) > 3 &&
+                    !IsInLineOfSight(EventPlayer().EyePosition() + (Direction * 3), EventPlayer().EyePosition() + (Down() * 3) + (Direction * 3)) &&
+                    (EntityExists(PlayerClosestToReticle(EventPlayer(), Team.Team2)) ? DistanceBetween(PlayerClosestToReticle(EventPlayer(), Team.Team2).Position(), EventPlayer().Position() + Direction) > 1 : true)
+                    ?
+                    1 : 0
+                ) *
+                (
+                    IsInLineOfSight(EventPlayer().EyePosition() + Direction, Bot.getTarget().EyePosition() + Direction) ? 2 : 1
+                )
+            ));
+
+            StartThrottleInDirection(EventPlayer(), LastOf(Bot.getPossibleDirections()) * 3, 1, Relative.ToWorld, ThrottleBehavior.AddToExistingThrottle, ThrottleRev.None);
+            break;
+        case BotEvent.ENEMY_LOST:
+            StopFacing(EventPlayer());
+            StopThrottleInDirection(EventPlayer());
+            StateMachine<BotState, BotEvent>.setState(EventPlayer().botState, BotState.IDLE);
+            break;
+    }
+}
+
+void handleDeadState() "[enemy/main.del] Subroutine handleDeadState" {
+    Bot.setTarget(EventPlayer(), null);
+    StopThrottleInDirection(EventPlayer());
+    WaitUntil(EventPlayer().IsAlive(), 9999);
+    StateMachine<BotState, BotEvent>.setState(EventPlayer().botState, BotState.IDLE);
+}
+
+playervar Bot bot;
+playervar StateMachine<BotState, BotEvent> botState;
+
+rule: '[enemy/main.del]: Setup'
+Event.OngoingPlayer
+Team.Team2
+Player.All
+if (EventPlayer().bot != null)
+if (EventPlayer().botState != null)
+{
+    StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: botState.getEvent());
+
+    LogToInspector("Updating state for " + EventPlayer());
+
+    Wait(Max(RandomReal(0.25, 0.5), ServerLoadAverage() / 255));
+
+    LoopIfConditionIsTrue();
+}

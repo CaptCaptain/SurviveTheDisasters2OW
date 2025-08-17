@@ -1,0 +1,63 @@
+globalvar Number[] HeroInfoTextIds = [];
+globalvar Number HeroInfoIndex = 0;
+
+void showHeroInfo() "[heroInfo.del] Subroutine showHeroInfo" {
+    String subtextOpacity: "BF";
+    LastCreated.wrap(() => {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce(""), EvaluateOnce("\n" + "{0} | Modifiers".Format([TX.getString("C0000000005E4F0")]) + Text.leftAlignString()), Location.Left, 7);
+    }, LastTextID(), HeroInfoTextIds);
+
+    LastCreated.wrap(() => {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce("{0} Role Bonus: Damage\n".Format([TX.getString("C00000000004122")]) + TextColor.Gray("• Gain a {0} {1}.".Format([TextColor.Orange("25%", subtextOpacity), TextColor.Orange("Score Bonus", subtextOpacity)])) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 7);
+    }, LastTextID(), HeroInfoTextIds);
+    LastCreated.wrap(() => {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce("{0} Role Bonus: Support\n".Format([TX.getString("C00000000004123")]) + TextColor.Gray("• Gain a {0} {1}.".Format([TextColor.Orange("25%", subtextOpacity), TextColor.Orange("Score Bonus", subtextOpacity)])) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 7);
+    }, LastTextID(), HeroInfoTextIds);
+
+    LastCreated.wrap(() => {
+        CreateHudText(PlayersOnHero(Hero.Mercy, Team.Team1), EvaluateOnce(""), EvaluateOnce("{0} Mercy: Angelic Blessing\n".Format([TX.getString("C00000000011E06")]) + TextColor.Gray("• {0} cooldown reduced by {1}.".Format([TextColor.Yellow("Resurrect", subtextOpacity), TextColor.Yellow("50%", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 7);
+    }, LastTextID(), HeroInfoTextIds);
+    LastCreated.wrap(() => {
+        CreateHudText(PlayersOnHero(Hero.Baptiste, Team.Team1), EvaluateOnce(""), EvaluateOnce("{0} Baptiste: Optimized Restock\n".Format([TX.getString("C00000000038F47")]) + TextColor.Gray("• {0} cooldown reduced by {1}.".Format([TextColor.Blue("Immortality Field", subtextOpacity), TextColor.Blue("50%", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 7);
+    }, LastTextID(), HeroInfoTextIds);
+    LastCreated.wrap(() => {
+        CreateHudText(PlayersOnHero(Hero.Lifeweaver, Team.Team1), EvaluateOnce(""), EvaluateOnce("{0} Lifeweaver: Nature's Embrace\n".Format([TX.getString("C0000000003C732")]) + TextColor.Gray("• {0} cooldown reduced by {1}.".Format([TextColor.Pink("Life Grip", subtextOpacity), TextColor.Pink("25%", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 7);
+    }, LastTextID(), HeroInfoTextIds);
+    LastCreated.wrap(() => {
+        CreateHudText(PlayersOnHero(Hero.Sombra, Team.Team1), EvaluateOnce(""), EvaluateOnce("{0} Sombra: Detected!\n".Format([TX.getString("C0000000005E488")]) + TextColor.Gray("• {0} can detect Sombra in {1}.".Format([TextColor.Purple("Enemies", subtextOpacity), TextColor.Purple("Stealth", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 7);
+    }, LastTextID(), HeroInfoTextIds);
+
+    LastCreated.wrap(() => {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce("{0} Challenge: Glass\n".Format([TX.getString("C00000000032B11")]) + TextColor.Gray("• You take {0} increased {1}\nand {0} decreased {2}.".Format([TextColor.Red("25%", subtextOpacity), TextColor.Red("damage", subtextOpacity), TextColor.Red("healing", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 8);
+    }, LastTextID(), HeroInfoTextIds);
+    LastCreated.wrap(() => {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce("{0} Challenge: Hacked\n".Format([TX.getString("C0000000000A6B5")]) + TextColor.Gray("• You {0} use {1}.".Format([TextColor.Purple("cannot", subtextOpacity), TextColor.Purple("Abilities", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 8);
+    }, LastTextID(), HeroInfoTextIds);
+    LastCreated.wrap(() => {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce("{0} Challenge: Pacifist\n".Format([TX.getString("C00000000017112")]) + TextColor.Gray("• You {0} deal {1}.".Format([TextColor.Pink("cannot", subtextOpacity), TextColor.Pink("damage", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 8);
+    }, LastTextID(), HeroInfoTextIds);
+    LastCreated.wrap(() => {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce("{0} Assist: Cannon\n".Format([TX.getString("C0000000005E494")]) + TextColor.Gray("• You deal {0} increased {1}.".Format([TextColor.Blue("25%", subtextOpacity), TextColor.Blue("damage\nand healing", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 8);
+    }, LastTextID(), HeroInfoTextIds);
+    LastCreated.wrap(() => {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce("{0} Assist: Reinforced\n".Format([TX.getString("C0000000005E463")]) + TextColor.Gray("• You gain {0} equal to {1}\nof your max health at the start of\na round.".Format([TextColor.Green("overhealth", subtextOpacity), TextColor.Green("100%", subtextOpacity)]), subtextOpacity) + Text.leftAlignString()), EvaluateOnce(""), Location.Left, 8);
+    }, LastTextID(), HeroInfoTextIds);
+}
+
+void hideHeroInfo() "[heroInfo.del] Subroutine hideHeroInfo" {
+    for (HeroInfoIndex = 0; CountOf(HeroInfoTextIds); 1) {
+        DestroyHudText(HeroInfoTextIds[HeroInfoIndex]);
+    }
+    Wait(0.016);
+    HeroInfoTextIds = [];
+}
+
+class HeroInfo {
+    public static void showInfo() {
+        showHeroInfo();
+    }
+
+    public static void hideInfo() {
+        hideHeroInfo();
+    }
+}

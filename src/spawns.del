@@ -1,0 +1,41 @@
+globalvar Vector[] SpawnPositions = [];
+
+class Spawns {
+    public static void addTeamSpawns() {
+        SpawnPositions.ModAppend(SpawnPoints(Team.Team1));
+    }
+    public static void clearSpawns() {
+        SpawnPositions = [];
+    }
+    public static void addSpawn(in Vector position) {
+        SpawnPositions.ModAppend(position);
+    }
+
+    public static Vector getClosestSpawnToPlayer(Player player, Number maxDistance = 3): SpawnPositions.Sort(element => DistanceBetween(element, player.Position()))[RandomInteger(1, Min(maxDistance, CountOf(SpawnPositions) - 1))];
+
+    public static Vector getClosestSpawnToPosition(Vector position, Number maxDistance = 3): SpawnPositions.Sort(element => DistanceBetween(element, position))[RandomInteger(1, Min(maxDistance, CountOf(SpawnPositions) - 1))];
+}
+
+rule: '[spawns.del] Setup Team Spawns'
+{
+    WaitUntil(IsGameInProgress(), 9999);
+    WaitUntil(CountOf(SpawnPoints(Team.Team1)) > 0, 9999);
+    Spawns.addTeamSpawns();
+}
+
+rule: '[spawns.del] Generate Spawns'
+Event.OngoingPlayer
+Team.Team1
+Player.All
+{
+    WaitUntil(DistanceBetween(EventPlayer().Position(), EvaluateOnce(EventPlayer().Position())) >= 5, 9999);
+    WaitUntil(HasSpawned(EventPlayer()), 9999);
+    WaitUntil(IsOnGround(EventPlayer()), 9999);
+    if (IsTrueForAny(SpawnPositions, DistanceBetween(EventPlayer().Position(), ArrayElement()) < 5)) {
+        Wait(0.016);
+        Loop();
+    }
+    Spawns.addSpawn(EventPlayer().Position());
+    Wait(0.016);
+    Loop();
+}

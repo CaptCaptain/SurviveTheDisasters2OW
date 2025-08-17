@@ -1,0 +1,21 @@
+single struct StateMachine<S, E> {
+    public S currentState;
+    public E currentEvent;
+
+    public static void setState(ref StateMachine<S, E> stateMachine, in S state) {
+        stateMachine.currentState = state;
+    }
+    public static void setEvent(ref StateMachine<S, E> stateMachine, in E event) {
+        stateMachine.currentEvent = event;
+    }
+    public S getState(): currentState;
+    public E getEvent(): currentEvent;
+
+    public static void dispatchEvent(ref StateMachine<S, E> stateMachine, const () => void eventHandler, in E event) {
+        stateMachine.currentEvent = <E>event;
+        eventHandler();
+        stateMachine.currentEvent = <E>null;
+    }
+
+    public static StateMachine<S, E> New(): { currentState: <S>null, currentEvent: <E>null };
+}

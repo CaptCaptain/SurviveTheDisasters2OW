@@ -1,0 +1,6 @@
+class LastCreated {
+    public static void wrap(const () => void method, in Any lastCreated, ref Any[] variable) {
+        method();
+        variable.ModAppend(lastCreated);
+    }
+}

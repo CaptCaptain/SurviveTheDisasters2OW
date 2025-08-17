@@ -1,0 +1,97 @@
+playervar String scoreboardRole;
+playervar String scoreboardUltimate;
+playervar String scoreboardScore;
+playervar String scoreboardStreak;
+playervar String scoreboardHealth;
+playervar String scoreboardIcon;
+playervar Color scoreboardIconColor;
+playervar String scoreboardName;
+
+class Scoreboard {
+    public static void died(in Player player = EventPlayer()) {
+        player.scoreboardIcon = TX.getString("C00000000032B11");
+        player.scoreboardIconColor = Color.Red;
+    }
+
+    public static void respawned(in Player player = EventPlayer()) {
+        player.scoreboardIcon = HeroIconString(HeroOf(player));
+        player.scoreboardIconColor = Color.LimeGreen;
+    }
+
+    public static void heroChanged(in Player player = EventPlayer()) {
+        player.scoreboardRole = ArrayContains(AllTankHeroes(), HeroOf(player)) ? TX.getString("C00000000004120") : ArrayContains(AllDamageHeroes(), HeroOf(player)) ? TX.getString("C00000000004122") : TX.getString("C00000000004123");
+        player.scoreboardIcon = HeroIconString(HeroOf(player));
+    }
+
+    public static void healthChanged(in Player player = EventPlayer()) {
+        String healthString: "{0}{1}{2}".Format([TX.getColorRGB("FFFFFF"), RoundToInteger(Health(player)), TX.getColorRGB("FFFFFF")]);
+        String maxHealthString: "{0}{1}{2}".Format([TX.getColorRGBA("FFFFFFBF"), RoundToInteger(MaxHealth(player)), TX.getColorRGB("FFFFFF")]);
+        player.scoreboardHealth = "{0} {1}/{2}".Format([TX.getString("C000000000402C8"), healthString, maxHealthString]);
+    }
+
+    public static void scoreChanged(in Player player = EventPlayer()) {
+        player.scoreboardScore = "{0} {1}".Format([TX.getString("C00000000044B59"), 0]);
+    }
+
+    public static void isReady(in Player player = EventPlayer()) {
+        player.scoreboardIcon = TX.getString("C00000000005A0E");
+    }
+
+    public static void streakChanged(in Player player = EventPlayer()) {
+        player.scoreboardStreak = "{0} {1}".Format([TX.getString("C00000000020AF6"), 0]);
+    }
+
+    public static void ultimateChargeChanged(in Player player = EventPlayer()) {
+        String ultimateIcon: UltimateChargePercent(player) < 100 ? AbilityIconString(HeroOf(player), Button.Ultimate) : TX.getString("C000000000039DB");
+        player.scoreboardUltimate = "{0} {1}%".Format([ultimateIcon, UltimateChargePercent(player)]);
+    }
+
+    public static void setup(in Player player = EventPlayer()) {
+        CreateHudText(AllPlayers(), player.scoreboardIcon, player.scoreboardName + Text.leftAlignString(), "{0} {1} {2}".Format([player.scoreboardHealth, player.scoreboardScore, player.scoreboardStreak]), Location.Left, 0, player.scoreboardIconColor, EvaluateOnce(Color.Orange), EvaluateOnce(Color.White), HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
+    }
+}
+
+rule: '[scoreboard.del] Setup Scoreboard'
+Event.OnPlayerJoin Team.Team1
+{
+    Scoreboard.setup();
+    scoreboardName = "{0}".Format([EventPlayer()]);
+    Scoreboard.scoreChanged();
+    Scoreboard.streakChanged();
+    Scoreboard.respawned();
+}
+
+rule: '[scoreboard.del] Update Scoreboard on Hero Change'
+Event.OngoingPlayer Team.Team1
+{
+    WaitUntil(HeroOf(EventPlayer()) != EvaluateOnce(HeroOf(EventPlayer())), 9999);
+    Scoreboard.heroChanged();
+    Wait(0.25);
+    Loop();
+}
+
+rule: '[scoreboard.del] Update Scoreboard on Ultimate Charge Change'
+Event.OngoingPlayer Team.Team1
+{
+    Scoreboard.ultimateChargeChanged();
+    WaitUntil(UltimateChargePercent(EventPlayer()) != EvaluateOnce(UltimateChargePercent(EventPlayer())), 1);
+    Wait(0.25);
+    Loop();
+}
+
+rule: '[scoreboard.del] Update Scoreboard on Health Change'
+Event.OngoingPlayer Team.Team1
+{
+    WaitUntil(NormalizedHealth(EventPlayer()) != EvaluateOnce(NormalizedHealth(EventPlayer())), 1);
+    Scoreboard.healthChanged();
+    Wait(0.25);
+    Loop();
+}
+
+rule: '[scoreboard.del] Update Scoreboard on Death'
+Event.OnDeath Team.Team1
+{
+    Scoreboard.died();
+    WaitUntil(IsAlive(EventPlayer()), 9999);
+    Scoreboard.respawned();                                                                                 
+}

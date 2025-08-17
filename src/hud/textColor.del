@@ -1,0 +1,10 @@
+class TextColor {
+    public static String Yellow(in String string, in String opacity = "FF"): "{0}{1}{2}".Format([TX.getColorRGBA("ECE9BD" + opacity), string, TX.getColorRGBA("FFFFFF" + opacity)]);
+    public static String Blue(in String string, in String opacity = "FF"): "{0}{1}{2}".Format([TX.getColorRGBA("55B2CC" + opacity), string, TX.getColorRGBA("FFFFFF" + opacity)]);
+    public static String Pink(in String string, in String opacity = "FF"): "{0}{1}{2}".Format([TX.getColorRGBA("E0B6C6" + opacity), string, TX.getColorRGBA("FFFFFF" + opacity)]);
+    public static String Red(in String string, in String opacity = "FF"): "{0}{1}{2}".Format([TX.getColorRGBA("D92C54" + opacity), string, TX.getColorRGBA("FFFFFF" + opacity)]);
+    public static String Purple(in String string, in String opacity = "FF"): "{0}{1}{2}".Format([TX.getColorRGBA("CC66DA" + opacity), string, TX.getColorRGBA("FFFFFF" + opacity)]);
+    public static String Green(in String string, in String opacity = "FF"): "{0}{1}{2}".Format([TX.getColorRGBA("C5FF95" + opacity), string, TX.getColorRGBA("FFFFFF" + opacity)]);
+    public static String Orange(in String string, in String opacity = "FF"): "{0}{1}{2}".Format([TX.getColorRGBA("FFA673" + opacity), string, TX.getColorRGBA("FFFFFF" + opacity)]);
+    public static String Gray(in String string, in String opacity = "BF"): "{0}{1}{2}".Format([TX.getColorRGBA("FFFFFF" + opacity), string, TX.getColorRGBA("FFFFFF" + opacity)]);
+}

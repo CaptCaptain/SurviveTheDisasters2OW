@@ -1,0 +1,67 @@
+single struct WaveDisasterData {
+    public Player[] bombs;
+    public Number index;
+    public Number timeStarted;
+}
+
+globalvar WaveDisasterData WaveDisaster = new WaveDisasterData();
+
+rule: '[disasters/wave.del] Wave Disaster Setup'
+{
+    Disasters.registerDisaster(DisasterId.WAVE, "Tsunami", Color.SkyBlue, TX.getString("C000000000655DE"), DisasterType.none, 25, disasterPool);
+}
+
+rule: '[disasters/wave.del] Wave Disaster'
+if (activeDisasters.Contains(<Number>DisasterId.WAVE))
+if (isDisasterActive)
+{
+    WaveDisaster.bombs = [];
+    WaveDisaster.index = 0;
+    WaveDisaster.timeStarted = TotalTimeElapsed();
+
+    for (WaveDisaster.index = 0; 6; 1) {
+        CreateDummyBot(AllHeroes().Filter(element => "{0}".Format([element]) == "Wuyang").First, Team.Team2, -1, AllPlayers(Team.Team1).Random().Position() + (Up() * 5));
+        WaveDisaster.bombs.ModAppend(LastCreatedEntity());
+
+        StartForcingDummyBotName(WaveDisaster.bombs[WaveDisaster.index], "Wave");
+        SetInvisible(WaveDisaster.bombs[WaveDisaster.index], InvisibleTo.All);
+        SetDamageDealt(WaveDisaster.bombs[WaveDisaster.index], 300);
+        SetStatus(WaveDisaster.bombs[WaveDisaster.index], null, Status.PhasedOut, 9999);
+        StartScalingPlayer(WaveDisaster.bombs[WaveDisaster.index], EasingFunctions.easeInQuad((TotalTimeElapsed() - WaveDisaster.timeStarted) / 15), true);
+
+        Wait(0.016);
+    }
+
+    Wait(1);
+
+    while (isDisasterActive) {
+        for (WaveDisaster.index = 0; 6; 1) {
+            Number directionMagnitude: Max(0.25, Min(1, EasingFunctions.easeInQuad((TotalTimeElapsed() - WaveDisaster.timeStarted) / 15)));
+
+            if (!isDisasterActive) return;
+            Teleport(WaveDisaster.bombs[WaveDisaster.index], NearestWalkablePosition(Spawns.getClosestSpawnToPosition(AllLivingPlayers(Team.Team1).Random().Position() + (Down() * 10), RandomInteger(3, 10))));
+            SetFacing(WaveDisaster.bombs[WaveDisaster.index], Vector(RandomReal(-1, 1), 0, RandomReal(-1, 1)));
+            StartThrottleInDirection(WaveDisaster.bombs[WaveDisaster.index], Vector(RandomReal(-1, 1), 0, RandomReal(-1, 1)), directionMagnitude);
+            Resurrect(WaveDisaster.bombs[WaveDisaster.index]);
+
+            Wait(0.016);
+        }
+        
+        SetAbilityCooldown(WaveDisaster.bombs.Filter(element => !IsUsingAbility1(element)), Button.Ability1, 0);
+        PressButton(WaveDisaster.bombs.Filter(element => !IsUsingAbility1(element)), Button.Ability1);
+
+        WaitUntil(!isDisasterActive, Max(0.016, 1 - EasingFunctions.easeInQuad((TotalTimeElapsed() - WaveDisaster.timeStarted) / 15)));
+        
+        SetAbilityCooldown(WaveDisaster.bombs.Filter(element => !IsUsingAbility2(element)), Button.Ability2, 0);
+        PressButton(WaveDisaster.bombs.Filter(element => !IsUsingAbility2(element)), Button.Ability2);
+
+        WaitUntil(WaveDisaster.bombs.Any(element => IsUsingAbility2(element)), 9999);
+        WaitUntil(WaveDisaster.bombs.All(element => !IsUsingAbility2(element)), 9999);
+
+        PressButton(WaveDisaster.bombs.Filter(element => IsUsingAbility1(element)), Button.Ability1);
+        WaitUntil(WaveDisaster.bombs.All(element => !IsUsingAbility1(element)), 9999);
+
+        WaitUntil(!isDisasterActive, Max(0.016, 1 - EasingFunctions.easeInQuad((TotalTimeElapsed() - WaveDisaster.timeStarted) / 15)));
+        Wait(0.016);
+    }
+}

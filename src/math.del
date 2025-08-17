@@ -1,0 +1,9 @@
+class Math {
+    public static Number pow(Number base, Number exponent): base ^ exponent;
+}
+
+class EasingFunctions {
+    public static Number easeInExpo(Number x): x == 0 ? 0 : Math.pow(2, 10 * x - 10);
+
+    public static Number easeInQuad(Number x): x * x;
+}

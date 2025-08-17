@@ -1,0 +1,101 @@
+single struct DisasterData {
+    public Number id;
+    public String name;
+    public Color color;
+    public String icon;
+    public String type;
+    public Number duration;
+    public static DisasterData New(in Number id = 0, in String name = "", in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30): {
+        id: id,
+        name: name,
+        color: color,
+        icon: icon,
+        type: type,
+        duration: duration
+    };
+}
+
+globalvar DisasterData[] disasters = [];
+globalvar Number[] disasterPool = [];
+globalvar Number[] hardcoreDisasterPool = [];
+globalvar Number[] bossHuntDisasterPool = [];
+globalvar Number[] activeDisasters = [];
+globalvar Boolean isDisasterActive = false;
+globalvar Number disasterIndex = 0;
+globalvar Number disasterSFXIndex = 0;
+
+class DisasterType {
+    public static String none: "Disaster";
+    public static String double: TextColor.Orange("{0} Double Trouble {0}".Format([TX.getString("C00000000020AF4")]));
+    public static String triple: TextColor.Red("{0} Triple Threat {0}".Format([TX.getString("C00000000020AF9")]));
+    public static String bossHunt: TextColor.Orange("{0} Boss Hunt {0}".Format([TX.getString("C0000000000D29C")]));
+    public static String mystery: TextColor.Gray("Mystery Disaster");
+}
+
+enum DisasterId {
+    NULL,
+    NUCLEAR_BOMB,
+    WAVE,
+    RAIN,
+    BOUNTY_HUNTER
+}
+
+class Disasters {
+    public static void setup() {
+        // Setup code for disasters
+    }
+
+    public static void startDisaster() {
+        isDisasterActive = true;
+    }
+
+    public static void addDisaster(in DisasterData data) {
+        activeDisasters.ModAppend(data.id);
+    }
+
+    public static DisasterData getDisaster(in Number id): disasters.Filter(element => element.id == id).First;
+    public static String getDisasterName(in Number id): getDisaster(id).name;
+    public static String getDisasterIcon(in Number id): getDisaster(id).icon;
+    public static String getDisasterType(in Number id): getDisaster(id).type;
+    public static Color getDisasterColor(in Number id): getDisaster(id).color;
+
+    public static void displayDisasters() {
+        for (disasterIndex = 0; CountOf(activeDisasters); 1) {
+            Hud.updateName(formatObjectiveNameString("{0} {1}".Format([getDisasterIcon(activeDisasters[disasterIndex]), getDisasterName(activeDisasters[disasterIndex])])));
+
+            if (CountOf(activeDisasters) == 2) {
+                Hud.updateType(DisasterType.double);
+            } else if (CountOf(activeDisasters) == 3) {
+                Hud.updateType(DisasterType.triple);
+            } else if (CountOf(activeDisasters) > 3) {
+                Hud.updateType(TextColor.Purple("Disaster × {0}".Format([CountOf(activeDisasters)])));
+            } else { Hud.updateType(getDisasterType(activeDisasters[disasterIndex])); }
+
+            Hud.updateColor(getDisasterColor(activeDisasters[disasterIndex]));
+
+            // Local Player does not work with PlayEffect
+            for (disasterSFXIndex = 0; disasterSFXIndex < CountOf(AllPlayers(Team.Team1)); disasterSFXIndex++) {
+                Player playerInSlot: PlayersInSlot(disasterSFXIndex, Team.Team1);
+                PlayEffect(playerInSlot, PlayEffect.DebuffImpactSound, Team.All, playerInSlot.Position(), 10000);
+            }
+
+            Wait(1 / CountOf(activeDisasters));
+        }
+        Wait(3);
+        Hud.updateName("");
+        Hud.updateType("");
+        Hud.updateColor(Color.White);
+    }
+
+    public static void registerDisaster(in Number | DisasterId id, in String name, in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30, ref Number[] pool) {
+        disasters.ModAppend(DisasterData.New(id, name, color, icon, type, duration));
+        pool.ModAppend(id);
+        pool = pool.Randomize();
+    }
+
+    public static void endDisaster() {
+        isDisasterActive = false;
+        activeDisasters = [];
+        DestroyAllDummyBots();
+    }
+}

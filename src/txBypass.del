@@ -1,0 +1,19 @@
+class TX {
+    private static String txCharacter;
+
+    public static String getCharacter(): txCharacter;
+    public static String getString(String value): "{0}TX {1}>".Format([getCharacter(), value]);
+    public static String getColorRGBA(String value): "{0}FG{1}>".Format([getCharacter(), value]);
+    public static String getColorRGB(String value): getColorRGBA("{0}FF".Format([value]));
+
+    public static void setup() {
+        CreateDummyBot(<Hero>AllHeroes(), <Team>HostPlayer(), false, null, null);
+        StartForcingDummyBotName(LastCreatedEntity(), "______________________________________________________________________________________________________________________________〼");
+        txCharacter = StringSplit(FirstOf(LastCreatedEntity()), EmptyArray());
+        StartForcingDummyBotName(LastCreatedEntity(), "______________________________________________________________________________________________________________________________ࡀ");
+        txCharacter = StringSlice(StringReplace("______________________________________________________________________________________________________________________________〼", getCharacter(), FirstOf(LastCreatedEntity())), 126, true);
+        DestroyAllDummyBots();
+    }
+}
+
+rule: '[txBypass.del] Setup TX Bypass' {TX.setup();}

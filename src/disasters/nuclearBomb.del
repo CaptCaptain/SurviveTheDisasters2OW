@@ -1,0 +1,44 @@
+single struct NuclearBombData {
+    public Player[] bombs;
+    public Number index;
+}
+
+globalvar NuclearBombData NuclearBombDisaster = new NuclearBombData();
+
+rule: '[disasters/nuclearBomb.del] Nuclear Bomb Disaster Setup'
+{
+    Disasters.registerDisaster(DisasterId.NUCLEAR_BOMB, "Nuclear Bomb", Color.Rose, TX.getString("C00000000004EA7"), DisasterType.none, 10, disasterPool);
+}
+
+rule: '[disasters/nuclearBomb.del] Nuclear Bomb Disaster'
+if (activeDisasters.Contains(<Number>DisasterId.NUCLEAR_BOMB))
+if (isDisasterActive)
+{
+    NuclearBombDisaster.bombs = [];
+    NuclearBombDisaster.index = 0;
+
+    for (NuclearBombDisaster.index = 0; 6; 1) {
+        CreateDummyBot(Hero.Dva, Team.Team2, -1, Spawns.getClosestSpawnToPlayer(AllLivingPlayers(Team.Team1).Random(), 5) + (Up() * 5));
+        NuclearBombDisaster.bombs.ModAppend(LastCreatedEntity());
+
+        StartForcingDummyBotName(NuclearBombDisaster.bombs[NuclearBombDisaster.index], "Nuclear Bomb");
+        SetInvisible(NuclearBombDisaster.bombs[NuclearBombDisaster.index], InvisibleTo.All);
+        SetGravity(NuclearBombDisaster.bombs[NuclearBombDisaster.index], 0);
+        Wait(0.016);
+    }
+
+    Wait(1);
+
+    for (NuclearBombDisaster.index = 0; 6; 1) {
+        while (!IsUsingUltimate(NuclearBombDisaster.bombs[NuclearBombDisaster.index])) {
+            SetUltimateCharge(NuclearBombDisaster.bombs[NuclearBombDisaster.index], 100);
+            PressButton(NuclearBombDisaster.bombs[NuclearBombDisaster.index], Button.Ultimate);
+            Wait(0.016);
+        }
+
+        WaitUntil(IsUsingUltimate(NuclearBombDisaster.bombs[NuclearBombDisaster.index]), 9999);
+
+        Teleport(NuclearBombDisaster.bombs[NuclearBombDisaster.index], Up() * 1000);
+        Wait(0.016);
+    }
+}

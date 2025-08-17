@@ -1,0 +1,60 @@
+single struct RainDisasterData {
+    public Player[] bombs;
+    public Number index;
+    public Number timeStarted;
+}
+
+globalvar RainDisasterData RainDisaster = new RainDisasterData();
+
+rule: '[disasters/Rain.del] Rain Disaster Setup'
+{
+    Disasters.registerDisaster(DisasterId.RAIN, "Explosive Rain", Color.Blue, TX.getString("C00000000065133"), DisasterType.none, 25, disasterPool);
+}
+
+rule: '[disasters/Rain.del] Rain Disaster'
+if (activeDisasters.Contains(<Number>DisasterId.RAIN))
+if (isDisasterActive)
+{
+    RainDisaster.bombs = [];
+    RainDisaster.index = 0;
+    RainDisaster.timeStarted = TotalTimeElapsed();
+
+    for (RainDisaster.index = 0; 10; 1) {
+        CreateDummyBot(AllHeroes().Filter(element => "{0}".Format([element]) == "Wuyang").First, Team.Team2, -1, AllPlayers(Team.Team1).Random().Position() + (Up() * 50));
+        RainDisaster.bombs.ModAppend(LastCreatedEntity());
+
+        StartForcingDummyBotName(RainDisaster.bombs[RainDisaster.index], "Rain");
+        SetInvisible(RainDisaster.bombs[RainDisaster.index], InvisibleTo.All);
+        SetDamageDealt(RainDisaster.bombs[RainDisaster.index], 500);
+        SetStatus(RainDisaster.bombs[RainDisaster.index], null, Status.PhasedOut, 9999);
+        SetGravity(RainDisaster.bombs[RainDisaster.index], 0);
+
+        Wait(0.016);
+    }
+
+    while (!IsUsingUltimate(RainDisaster.bombs[0])) {
+        SetUltimateCharge(RainDisaster.bombs[0], 100);
+        PressButton(RainDisaster.bombs[0], Button.Ultimate);
+        PressButton(RainDisaster.bombs[0], Button.SecondaryFire);
+        Wait(0.016);
+    }
+
+    while (isDisasterActive) {
+        for (RainDisaster.index = 0; 10; 1) {
+            Number directionMagnitude: Max(0.25, Min(1, EasingFunctions.easeInQuad((TotalTimeElapsed() - RainDisaster.timeStarted) / 15)));
+
+            if (!isDisasterActive) return;
+            Teleport(RainDisaster.bombs[RainDisaster.index], Spawns.getClosestSpawnToPosition(AllLivingPlayers(Team.Team1).Random().Position(), 5) + (Up() * 30));
+            SetFacing(RainDisaster.bombs[RainDisaster.index], Down());
+            StartThrottleInDirection(RainDisaster.bombs[RainDisaster.index], Vector(RandomReal(-1, 1), 0, RandomReal(-1, 1)), directionMagnitude);
+            Resurrect(RainDisaster.bombs[RainDisaster.index]);
+
+            Wait(0.016);
+        }
+        
+        StartHoldingButton(RainDisaster.bombs.Filter(element => !IsFiringPrimary(element)), Button.PrimaryFire);
+
+        WaitUntil(!isDisasterActive, Max(0.016, 1 - EasingFunctions.easeInQuad((TotalTimeElapsed() - RainDisaster.timeStarted) / 15)));
+        Wait(0.016);
+    }
+}

@@ -1,0 +1,107 @@
+enum BountyHunterState {
+    NULL,
+    IDLE,
+    ATTACKING
+}
+
+enum BountyHunterEvent {
+    NULL,
+    ENEMY_IN_VIEW,
+    ENEMY_LOST,
+    USE_ULTIMATE
+}
+
+void handleBountyHunterEvent() "[enemy/bountyHunter.del] Subroutine bountyHunter" {
+    switch (bountyHunterState.getState()) {
+        case BountyHunterState.IDLE:
+            handleBountyHunterIdleState();
+            break;
+        case BountyHunterState.ATTACKING:
+            handleBountyHunterAttackingState();
+            break;
+    }
+}
+
+void handleBountyHunterIdleState() "[enemy/bountyHunter.del] Subroutine handleBountyHunterIdleState" {
+    switch (bountyHunterState.getEvent()) {
+        case BountyHunterEvent.NULL:
+            if (EntityExists(EventPlayer().bot.target) && IsInLineOfSight(EventPlayer().EyePosition(), EventPlayer().bot.target.EyePosition())) {
+                StateMachine<BountyHunterState, BountyHunterEvent>.setState(bountyHunterState, BountyHunterState.ATTACKING);
+                StateMachine<BountyHunterState, BountyHunterEvent>.dispatchEvent(bountyHunterState, handleBountyHunterEvent, BountyHunterEvent.ENEMY_IN_VIEW);
+            }
+            break;
+    }
+}
+
+void handleBountyHunterAttackingState() "[enemy/bountyHunter.del] Subroutine handleBountyHunterAttackingState" {
+    switch (bountyHunterState.getEvent()) {
+        case BountyHunterEvent.NULL:
+            if (EntityExists(EventPlayer().bot.target) && IsInLineOfSight(EventPlayer().EyePosition(), EventPlayer().bot.target.EyePosition())) StateMachine<BountyHunterState, BountyHunterEvent>.dispatchEvent(bountyHunterState, handleBountyHunterEvent, BountyHunterEvent.ENEMY_IN_VIEW);
+            else StateMachine<BountyHunterState, BountyHunterEvent>.dispatchEvent(bountyHunterState, handleBountyHunterEvent, BountyHunterEvent.ENEMY_LOST);
+
+            break;
+        case BountyHunterEvent.ENEMY_IN_VIEW:
+            StartHoldingButton(EventPlayer(), Button.PrimaryFire);
+
+            if (IsInAir(EventPlayer())) StartHoldingButton(EventPlayer(), Button.SecondaryFire);
+            else StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+
+            if (!IsUsingAbility1(EventPlayer()) && DistanceBetween(EventPlayer().bot.target.Position(), EventPlayer().Position()) > 5)
+                PressButton(EventPlayer(), Button.Ability1);
+
+            if (Modulo(RoundToInteger(MatchTime()), 8) <= 0) StateMachine<BountyHunterState, BountyHunterEvent>.dispatchEvent(bountyHunterState, handleBountyHunterEvent, BountyHunterEvent.USE_ULTIMATE);
+
+            break;
+        case BountyHunterEvent.USE_ULTIMATE:
+            SetUltimateCharge(EventPlayer(), UltimateChargePercent() + 50);
+            SetAbilityCharge(EventPlayer(), Button.Ability1, 3);
+            SetAbilityCooldown(EventPlayer(), Button.Ability2, 0);
+            PressButton(EventPlayer(), Button.Ability2);
+            WaitUntil(!IsUsingAbility2(EventPlayer()), 9999);
+            PressButton(EventPlayer(), Button.Ultimate);
+            WaitUntil(IsInAir(EventPlayer()), 9999);
+            WaitUntil(IsOnGround(EventPlayer()), 1.2);
+            StateMachine<BountyHunterState, BountyHunterEvent>.dispatchEvent(bountyHunterState, handleBountyHunterEvent, BountyHunterEvent.ENEMY_LOST);
+            break;
+
+        case BountyHunterEvent.ENEMY_LOST:
+            StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+            StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+            StateMachine<BountyHunterState, BountyHunterEvent>.setState(bountyHunterState, BountyHunterState.IDLE);
+            break;
+    }
+}
+
+playervar StateMachine<BountyHunterState, BountyHunterEvent> bountyHunterState;
+
+rule: '[enemy/bountyHunter.del]: Setup'
+Event.OngoingPlayer
+Team.Team2
+if (EventPlayer().bountyHunterState != null)
+{    
+    CreateInWorldText(AllPlayers(), EvaluateOnce(TX.getString("C0000000005F9BC") + "\n\n"), EventPlayer(), 3, Clipping.DoNotClip);
+    AddHealthPoolToPlayer(EventPlayer(), HealthType.Health, Min(6, NumberOfPlayers(Team.Team1)) * 500 - MaxHealth(EventPlayer()), false, true);
+
+    while (true) {
+        StateMachine<BountyHunterState, BountyHunterEvent>.dispatchEvent(EventPlayer().bountyHunterState, eventHandler: handleBountyHunterEvent, event: EventPlayer().bountyHunterState.getEvent());
+
+        LogToInspector("Updating state for " + EventPlayer());
+
+        Wait(Max(RandomReal(0.25, 0.5), ServerLoadAverage() / 255));
+    }
+}
+
+rule: '[enemy/bountyHunter.del]: Freeze on Ult'
+Event.OnDamageDealt
+Team.Team2
+if (EventPlayer().bountyHunterState != null)
+if (EventAbility() == Button.Ultimate)
+{
+    if (!HasStatus(Victim(), Status.Frozen)) SetStatus(Victim(), null, Status.Frozen, 1.2);
+    Wait(0.016);
+    // Wait(1.2 + 0.016);
+    // SetStatus(PlayersWithinRadius(Victim().Position(), 5.5, Team.Team1, RadiusLOS.SurfacesAndEnemyBarriers), null, Status.KnockedDown, 1.5);
+    // ApplyImpulse(PlayersWithinRadius(Victim().Position(), 5.5, Team.Team1, RadiusLOS.SurfacesAndEnemyBarriers), Up(), 10);
+    // PlayEffect(AllPlayers(), PlayEffect.BadExplosion, Team.Team2, Victim().Position(), 5.5);
+    // PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Team.Team2, Victim().Position(), 5.5 * 2);
+}

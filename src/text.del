@@ -1,0 +1,12 @@
+class Text {
+    public static String getFixedSmallMessage(in String msg): "   {0}".Format([msg]);
+    public static String getFixedSmallMessageWithIcon(in String icon, in String msg): getFixedSmallMessage("{0}  {1}".Format([icon, msg]));
+    
+    public static void smallMessage(in Player player = EventPlayer(), in String msg) {
+        SmallMessage(player, getFixedSmallMessage(msg));
+    }
+    public static void smallMessageWithIcon(in Player player = EventPlayer(), in String icon, in String msg) {
+        SmallMessage(player, getFixedSmallMessageWithIcon(icon, msg));
+    }
+    public static String leftAlignString(): "                                                                                                                                                                ";
+}

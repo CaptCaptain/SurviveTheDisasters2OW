@@ -1,0 +1,38 @@
+import "../enemy/bountyHunter.del";
+
+single struct BountyHunterDisasterData {
+    public Number index;
+    public Player entity;
+    public Player vo_entity;
+}
+
+globalvar BountyHunterDisasterData BountyHunterDisaster = new BountyHunterDisasterData();
+
+rule: '[disasters/bountyHunter.del] Bounty Hunter Disaster Setup'
+{
+    Disasters.registerDisaster(DisasterId.BOUNTY_HUNTER, "Bounty Hunter", Color.Aqua, TX.getString("C0000000005F9BC"), DisasterType.bossHunt, 60, disasterPool);
+}
+
+rule: '[disasters/bountyHunter.del] Bounty Hunter Disaster'
+if (activeDisasters.Contains(<Number>DisasterId.BOUNTY_HUNTER))
+if (isDisasterActive) 
+{
+    BountyHunterDisaster.index = 0;
+    
+    CreateDummyBot(Hero.Freja, Team.Team2, -1, Spawns.getClosestSpawnToPlayer(AllLivingPlayers(Team.Team1).Random(), 1));
+    BountyHunterDisaster.entity = LastCreatedEntity();
+    BountyHunterDisaster.entity.bot = Bot.New();
+    BountyHunterDisaster.entity.botState = StateMachine<BotState, BotEvent>.New();
+    BountyHunterDisaster.entity.bountyHunterState = StateMachine<BountyHunterState, BountyHunterEvent>.New();
+    SetDamageDealt(BountyHunterDisaster.entity, 150);
+    StateMachine<BotState, BotEvent>.setState(BountyHunterDisaster.entity.botState, BotState.IDLE);
+    StateMachine<BountyHunterState, BountyHunterEvent>.setState(BountyHunterDisaster.entity.bountyHunterState, BountyHunterState.IDLE);
+    StartForcingDummyBotName(BountyHunterDisaster.entity, "Bounty Hunter");
+
+    WaitUntil(IsDead(BountyHunterDisaster.entity) || !isDisasterActive, 9999);
+
+    if (isDisasterActive)
+    {
+        SetMatchTime(Min(3, MatchTime()));
+    }
+}
