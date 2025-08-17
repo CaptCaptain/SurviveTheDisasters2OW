@@ -49,7 +49,7 @@ void handleBountyHunterAttackingState() "[enemy/bountyHunter.del] Subroutine han
             if (!IsUsingAbility1(EventPlayer()) && DistanceBetween(EventPlayer().bot.target.Position(), EventPlayer().Position()) > 5)
                 PressButton(EventPlayer(), Button.Ability1);
 
-            if (Modulo(RoundToInteger(MatchTime()), 8) <= 0) StateMachine<BountyHunterState, BountyHunterEvent>.dispatchEvent(bountyHunterState, handleBountyHunterEvent, BountyHunterEvent.USE_ULTIMATE);
+            if (Modulo(RoundToInteger(MatchTime()), 4) <= 0) StateMachine<BountyHunterState, BountyHunterEvent>.dispatchEvent(bountyHunterState, handleBountyHunterEvent, BountyHunterEvent.USE_ULTIMATE);
 
             break;
         case BountyHunterEvent.USE_ULTIMATE:
