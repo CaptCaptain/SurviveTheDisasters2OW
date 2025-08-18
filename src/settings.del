@@ -1,0 +1,13 @@
+single struct WorkshopSettings {
+    public Boolean debugMode;
+    public Number maxRounds;
+
+    public static WorkshopSettings New() {
+        return {
+            debugMode: WorkshopSettingToggle("Game", "Debug", false, 0),
+            maxRounds: WorkshopSettingInteger("Game", "Max Rounds", 20, 5, 30)
+        };
+    }
+}
+
+globalvar WorkshopSettings GameSettings = WorkshopSettings.New();

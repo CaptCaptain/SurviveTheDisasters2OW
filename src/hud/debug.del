@@ -1,0 +1,10 @@
+class DebugHud {
+    public static void setup() {
+        CreateHudText(AllPlayers(), EvaluateOnce(""), TextColor.Gray("SL {0} / AVG {1} / PK {2}".Format([ServerLoad(), ServerLoadAverage(), ServerLoadPeak()])), EvaluateOnce(""), Location.Right, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString);
+    }
+}
+
+rule: '[debug.del] Setup'
+{
+    DebugHud.setup();
+}
