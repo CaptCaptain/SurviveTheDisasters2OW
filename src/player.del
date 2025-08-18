@@ -1,3 +1,5 @@
+Number isPlayer(in Player player = EventPlayer()): SlotOf(player) <= EvaluateOnce(NumberOfSlots(Team.Team1) - 1);
+
 rule: '[player.del] Setup Player'
 Event.OngoingPlayer Team.Team1
 {

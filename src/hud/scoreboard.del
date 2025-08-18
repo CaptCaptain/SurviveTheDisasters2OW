@@ -53,6 +53,7 @@ class Scoreboard {
 
 rule: '[scoreboard.del] Setup Scoreboard'
 Event.OnPlayerJoin Team.Team1
+if (isPlayer(EventPlayer()))
 {
     Scoreboard.setup();
     scoreboardName = "{0}".Format([EventPlayer()]);
@@ -63,6 +64,7 @@ Event.OnPlayerJoin Team.Team1
 
 rule: '[scoreboard.del] Update Scoreboard on Hero Change'
 Event.OngoingPlayer Team.Team1
+if (isPlayer(EventPlayer()))
 {
     WaitUntil(HeroOf(EventPlayer()) != EvaluateOnce(HeroOf(EventPlayer())), 9999);
     Scoreboard.heroChanged();
@@ -72,6 +74,7 @@ Event.OngoingPlayer Team.Team1
 
 rule: '[scoreboard.del] Update Scoreboard on Ultimate Charge Change'
 Event.OngoingPlayer Team.Team1
+if (isPlayer(EventPlayer()))
 {
     Scoreboard.ultimateChargeChanged();
     WaitUntil(UltimateChargePercent(EventPlayer()) != EvaluateOnce(UltimateChargePercent(EventPlayer())), 1);
@@ -81,6 +84,7 @@ Event.OngoingPlayer Team.Team1
 
 rule: '[scoreboard.del] Update Scoreboard on Health Change'
 Event.OngoingPlayer Team.Team1
+if (isPlayer(EventPlayer()))
 {
     WaitUntil(NormalizedHealth(EventPlayer()) != EvaluateOnce(NormalizedHealth(EventPlayer())), 1);
     Scoreboard.healthChanged();
@@ -90,6 +94,7 @@ Event.OngoingPlayer Team.Team1
 
 rule: '[scoreboard.del] Update Scoreboard on Death'
 Event.OnDeath Team.Team1
+if (isPlayer(EventPlayer()))
 {
     Scoreboard.died();
     WaitUntil(IsAlive(EventPlayer()), 9999);
