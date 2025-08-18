@@ -1,0 +1,55 @@
+single struct PetalDisasterData {
+    public Player[] bombs;
+    public Number index;
+    public Number timeStarted;
+}
+
+globalvar PetalDisasterData petalDisaster = new PetalDisasterData();
+
+rule: '[disasters/petal.del] Petal Disaster Setup'
+{
+    Disasters.registerDisaster(DisasterId.PETAL, "Petal Platform", Color.Rose, TX.getString("C0000000003C735"), DisasterType.none, 25, disasterPool);
+}
+
+rule: '[disasters/petal.del] Petal Disaster'
+if (activeDisasters.Contains(<Number>DisasterId.PETAL))
+if (isDisasterActive)
+{
+    petalDisaster.bombs = [];
+    petalDisaster.index = 0;
+    petalDisaster.timeStarted = TotalTimeElapsed();
+
+    for (petalDisaster.index = 0; NumberOfPlayers(Team.Team1); 1) {
+        CreateDummyBot(Hero.Lifeweaver, Team.Team2, -1, AllPlayers(Team.Team1).Random().Position() + (Up() * 50));
+        petalDisaster.bombs.ModAppend(LastCreatedEntity());
+
+        StartForcingDummyBotName(petalDisaster.bombs[petalDisaster.index], "Petal");
+        SetInvisible(petalDisaster.bombs[petalDisaster.index], InvisibleTo.All);
+        SetStatus(petalDisaster.bombs[petalDisaster.index], null, Status.PhasedOut, 9999);
+        SetGravity(petalDisaster.bombs[petalDisaster.index], 0);
+        SetProjectileSpeed(petalDisaster.bombs[petalDisaster.index], 1000);
+
+        Wait(0.016);
+    }
+
+    while (isDisasterActive) {
+        for (petalDisaster.index = 0; CountOf(petalDisaster.bombs); 1) {
+            Number directionMagnitude: Max(0.25, Min(1, EasingFunctions.easeInQuad((TotalTimeElapsed() - petalDisaster.timeStarted) / 15)));
+
+            if (!isDisasterActive) return;
+            Teleport(petalDisaster.bombs[petalDisaster.index], Spawns.getClosestSpawnToPosition(AllLivingPlayers(Team.Team1).Random().Position(), 1) + (Up() * 15));
+            SetFacing(petalDisaster.bombs[petalDisaster.index], Down());
+            StartThrottleInDirection(petalDisaster.bombs[petalDisaster.index], Vector(RandomReal(-1, 1), 0, RandomReal(-1, 1)), directionMagnitude);
+            Resurrect(petalDisaster.bombs[petalDisaster.index]);
+
+            Wait(0.016);
+        }
+
+        SetAbilityCooldown(petalDisaster.bombs.Filter(element => !IsFiringPrimary(element)), Button.Ability1, 0);
+        PressButton(petalDisaster.bombs.Filter(element => !IsFiringPrimary(element)), Button.Ability1);
+
+        WaitUntil(!isDisasterActive, RandomReal(3, 5));
+
+        Wait(0.016);
+    }
+}
