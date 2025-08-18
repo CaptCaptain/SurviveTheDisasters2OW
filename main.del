@@ -5,6 +5,8 @@ import "src/text.del";
 import "src/lastCreated.del";
 import "src/spawns.del";
 
+import "src/settings.del";
+
 import "src/enemy/stateMachine.del";
 import "src/enemy/main.del";
 
@@ -13,7 +15,9 @@ import "src/disasters/nuclearBomb.del";
 import "src/disasters/wave.del";
 import "src/disasters/rain.del";
 import "src/disasters/bountyHunter.del";
+import "src/disasters/sunWarrior.del";
 
+import "src/hud/debug.del";
 import "src/hud/scoreboard.del";
 import "src/hud/textColor.del";
 import "src/hud/heroInfo.del";

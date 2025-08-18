@@ -1,0 +1,103 @@
+enum SunWarriorState {
+    NULL,
+    IDLE,
+    ATTACKING
+}
+
+enum SunWarriorEvent {
+    NULL,
+    ENEMY_IN_VIEW,
+    ENEMY_LOST,
+    USE_ULTIMATE
+}
+
+void handleSunWarriorEvent() "[enemy/sunWarrior.del] Subroutine SunWarrior" {
+    switch (sunWarriorState.getState()) {
+        case SunWarriorState.IDLE:
+            handleSunWarriorIdleState();
+            break;
+        case SunWarriorState.ATTACKING:
+            handleSunWarriorAttackingState();
+            break;
+    }
+}
+
+void handleSunWarriorIdleState() "[enemy/sunWarrior.del] Subroutine handleSunWarriorIdleState" {
+    switch (sunWarriorState.getEvent()) {
+        case SunWarriorEvent.NULL:
+            if (EntityExists(EventPlayer().bot.target) && IsInLineOfSight(EventPlayer().EyePosition(), EventPlayer().bot.target.EyePosition())) {
+                StateMachine<SunWarriorState, SunWarriorEvent>.setState(sunWarriorState, SunWarriorState.ATTACKING);
+                StateMachine<SunWarriorState, SunWarriorEvent>.dispatchEvent(sunWarriorState, handleSunWarriorEvent, SunWarriorEvent.ENEMY_IN_VIEW);
+            }
+            break;
+    }
+}
+
+void handleSunWarriorAttackingState() "[enemy/sunWarrior.del] Subroutine handleSunWarriorAttackingState" {
+    switch (sunWarriorState.getEvent()) {
+        case SunWarriorEvent.NULL:
+            if (EntityExists(EventPlayer().bot.target) && IsInLineOfSight(EventPlayer().EyePosition(), EventPlayer().bot.target.EyePosition())) StateMachine<SunWarriorState, SunWarriorEvent>.dispatchEvent(sunWarriorState, handleSunWarriorEvent, SunWarriorEvent.ENEMY_IN_VIEW);
+            else StateMachine<SunWarriorState, SunWarriorEvent>.dispatchEvent(sunWarriorState, handleSunWarriorEvent, SunWarriorEvent.ENEMY_LOST);
+
+            break;
+        case SunWarriorEvent.ENEMY_IN_VIEW:
+            if (Modulo(RoundToInteger(MatchTime()), 1) <= 0) PressButton(EventPlayer(), Button.PrimaryFire);
+
+            if (AltitudeOf(EventPlayer()) > 5 && IsInAir(EventPlayer())) StartHoldingButton(EventPlayer(), Button.Crouch);
+            else StopHoldingButton(EventPlayer(), Button.Crouch);
+
+            if (!IsUsingAbility1(EventPlayer()) && DistanceBetween(ClosestPlayerTo(EventPlayer().Position(), Team.Team1), EventPlayer().Position()) < 8.5)
+                PressButton(EventPlayer(), Button.Ability1);
+
+            if (Modulo(RoundToInteger(MatchTime()), 8) <= 0) StateMachine<SunWarriorState, SunWarriorEvent>.dispatchEvent(sunWarriorState, handleSunWarriorEvent, SunWarriorEvent.USE_ULTIMATE);
+
+            break;
+        case SunWarriorEvent.USE_ULTIMATE:
+            SetUltimateCharge(EventPlayer(), UltimateChargePercent() + 50);
+            SetAbilityCooldown(EventPlayer(), Button.Ability1, 0);
+            StartHoldingButton(EventPlayer(), Button.Ability1);
+            WaitUntil(!IsUsingAbility1(EventPlayer()), 9999);
+            PressButton(EventPlayer(), Button.Ultimate);
+            StopHoldingButton(EventPlayer(), Button.Ability1);
+            StateMachine<SunWarriorState, SunWarriorEvent>.dispatchEvent(sunWarriorState, handleSunWarriorEvent, SunWarriorEvent.ENEMY_LOST);
+            break;
+
+        case SunWarriorEvent.ENEMY_LOST:
+            StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+            StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+            StateMachine<SunWarriorState, SunWarriorEvent>.setState(sunWarriorState, SunWarriorState.IDLE);
+            break;
+    }
+}
+
+playervar StateMachine<SunWarriorState, SunWarriorEvent> sunWarriorState;
+
+rule: '[enemy/sunWarrior.del]: Setup'
+Event.OngoingPlayer
+Team.Team2
+Player.Illari
+if (EventPlayer().sunWarriorState != null)
+{    
+    CreateInWorldText(AllPlayers(), EvaluateOnce(TX.getString("C0000000005E4E7") + "\n\n"), EventPlayer(), 3, Clipping.DoNotClip);
+    AddHealthPoolToPlayer(EventPlayer(), HealthType.Health, Min(6, NumberOfPlayers(Team.Team1)) * 500 - MaxHealth(EventPlayer()), false, true);
+
+    while (true) {
+        StateMachine<SunWarriorState, SunWarriorEvent>.dispatchEvent(EventPlayer().sunWarriorState, eventHandler: handleSunWarriorEvent, event: EventPlayer().sunWarriorState.getEvent());
+
+        LogToInspector("Updating state for " + EventPlayer());
+
+        Wait(Max(RandomReal(0.25, 0.5), ServerLoadAverage() / 255));
+    }
+}
+
+rule: '[enemy/sunWarrior.del]: Sunstruck on Ult'
+Event.OnDamageDealt
+Team.Team2
+Player.Illari
+if (EventPlayer().sunWarriorState != null)
+if (EventAbility() == Button.Ability1)
+{
+    SetStatus(PlayersWithinRadius(Victim().Position(), 10, Team.Team1, RadiusLOS.SurfacesAndEnemyBarriers), null, Status.Burning, 0.8);
+    Damage(PlayersWithinRadius(Victim().Position(), 10, Team.Team1, RadiusLOS.SurfacesAndEnemyBarriers), EventPlayer(), 90);
+    Heal(PlayersWithinRadius(Victim().Position(), 10, Team.Team1, RadiusLOS.SurfacesAndEnemyBarriers), EventPlayer(), 90);
+}

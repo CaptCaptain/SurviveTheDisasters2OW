@@ -37,7 +37,8 @@ enum DisasterId {
     NUCLEAR_BOMB,
     WAVE,
     RAIN,
-    BOUNTY_HUNTER
+    BOUNTY_HUNTER,
+    SUN_WARRIOR
 }
 
 class Disasters {
