@@ -1,0 +1,37 @@
+import "../enemy/trackSoldier.del";
+
+single struct TrackDisasterData {
+    public Player[] soldiers;
+    public Number index;
+    public Number[] effects;
+}
+
+globalvar TrackDisasterData TrackDisaster = new TrackDisasterData();
+
+rule: '[disasters/trackAndField.del] Track and Field Disaster Setup'
+{
+    Disasters.registerDisaster(DisasterId.TRACK_AND_FIELD, "Track and Field", Color.LimeGreen, TX.getString("C0000000000333A"), DisasterType.none, 25, disasterPool);
+}
+
+rule: '[disasters/trackAndField.del] Track and Field Disaster'
+if (activeDisasters.Contains(<Number>DisasterId.TRACK_AND_FIELD))
+if (isDisasterActive) {
+    for (TrackDisaster.index = 0; 6; 1) {
+        CreateDummyBot(Hero.Soldier76, Team.Team2, -1, Spawns.getClosestSpawnToPlayer(AllLivingPlayers(Team.Team1).Random(), 1));
+        TrackDisaster.soldiers[TrackDisaster.index] = LastCreatedEntity();
+
+        Player soldier = TrackDisaster.soldiers[TrackDisaster.index];
+
+        soldier.bot = Bot.New();
+        soldier.botState = StateMachine<BotState, BotEvent>.New();
+        soldier.trackSoldierState = StateMachine<TrackSoldierState, TrackSoldierEvent>.New();
+        StateMachine<BotState, BotEvent>.setState(soldier.botState, BotState.IDLE);
+        StateMachine<TrackSoldierState, TrackSoldierEvent>.setState(soldier.trackSoldierState, TrackSoldierState.IDLE);
+    }
+
+    WaitUntil(!isDisasterActive, 9999);
+
+    for (TrackDisaster.index = 0; CountOf(TrackDisaster.effects); 1) {
+        DestroyEffect(TrackDisaster.effects[TrackDisaster.index]);
+    }
+}

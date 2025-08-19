@@ -1,0 +1,90 @@
+enum TrackSoldierState {
+    NULL,
+    IDLE,
+    RUNNING
+}
+
+enum TrackSoldierEvent {
+    NULL,
+    ENEMY_IN_VIEW,
+    ENEMY_LOST
+}
+
+void handleTrackSoldierEvent() "[enemy/trackSoldier.del] Subroutine trackSoldier" {
+    switch (trackSoldierState.getState()) {
+        case TrackSoldierState.IDLE:
+            handleTrackSoldierIdleState();
+            break;
+        case TrackSoldierState.RUNNING:
+            handleTrackSoldierRunningState();
+            break;
+    }
+}
+
+void handleTrackSoldierIdleState() "[enemy/trackSoldier.del] Subroutine handleTrackSoldierIdleState" {
+    switch (trackSoldierState.getEvent()) {
+        case TrackSoldierEvent.NULL:
+            if (EntityExists(EventPlayer().bot.target) && IsInLineOfSight(EventPlayer().EyePosition(), EventPlayer().bot.target.EyePosition())) {
+                StateMachine<TrackSoldierState, TrackSoldierEvent>.setState(trackSoldierState, TrackSoldierState.RUNNING);
+                StateMachine<TrackSoldierState, TrackSoldierEvent>.dispatchEvent(trackSoldierState, handleTrackSoldierEvent, TrackSoldierEvent.ENEMY_IN_VIEW);
+            }
+            break;
+    }
+}
+
+void handleTrackSoldierRunningState() "[enemy/trackSoldier.del] Subroutine handleTrackSoldierRunningState" {
+    switch (trackSoldierState.getEvent()) {
+        case TrackSoldierEvent.NULL:
+            if (EntityExists(EventPlayer().bot.target) && IsInLineOfSight(EventPlayer().EyePosition(), EventPlayer().bot.target.EyePosition())) StateMachine<TrackSoldierState, TrackSoldierEvent>.dispatchEvent(trackSoldierState, handleTrackSoldierEvent, TrackSoldierEvent.ENEMY_IN_VIEW);
+            else StateMachine<TrackSoldierState, TrackSoldierEvent>.dispatchEvent(trackSoldierState, handleTrackSoldierEvent, TrackSoldierEvent.ENEMY_LOST);
+
+            break;
+        case TrackSoldierEvent.ENEMY_IN_VIEW:
+            if (Modulo(RoundToInteger(MatchTime()), 2) <= 0) PressButton(EventPlayer(), Button.Jump);
+
+            if (!IsUsingAbility1(EventPlayer()))
+                StartHoldingButton(EventPlayer(), Button.Ability1);
+
+            break;
+
+        case TrackSoldierEvent.ENEMY_LOST:
+            StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+            StateMachine<TrackSoldierState, TrackSoldierEvent>.setState(trackSoldierState, TrackSoldierState.IDLE);
+            break;
+    }
+}
+
+playervar StateMachine<TrackSoldierState, TrackSoldierEvent> trackSoldierState;
+
+rule: '[enemy/trackSoldier.del]: Setup'
+Event.OngoingPlayer
+Team.Team2
+Player.Soldier76
+if (EventPlayer().trackSoldierState != null)
+{    
+    CreateEffect(AllPlayers(), Effect.Ring, Color.Orange, UpdateEveryFrame(EvaluateOnce(EventPlayer()).Position()), EvaluateOnce(4.5), EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.Cloud, Color.Orange, UpdateEveryFrame(EvaluateOnce(EventPlayer()).Position()), EvaluateOnce(4.5), EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.Ring, Color.Red, UpdateEveryFrame(EvaluateOnce(EventPlayer()).Position() + (2 * Down() * EasingFunctions.easeOutExpo(Modulo(TotalTimeElapsed(), 0.5)))), 4.5 * EasingFunctions.easeOutExpo(Modulo(TotalTimeElapsed(), 0.5)), EffectRev.VisibleToPositionAndRadius);
+    SetMoveSpeed(EventPlayer(), 200);
+
+    StartForcingDummyBotName(EventPlayer(), ["Soldier: 76", "Runner: 76", "OnlyLegs", "Metro", "Stadium Elite"].Random());
+
+    while (true) {
+        StateMachine<TrackSoldierState, TrackSoldierEvent>.dispatchEvent(EventPlayer().trackSoldierState, eventHandler: handleTrackSoldierEvent, event: EventPlayer().trackSoldierState.getEvent());
+
+        LogToInspector("Updating state for " + EventPlayer());
+
+        Wait(Max(RandomReal(0.25, 0.5), ServerLoadAverage() / 255));
+    }
+}
+
+rule: '[enemy/trackSoldier.del]: Damage'
+Event.OngoingPlayer
+Team.Team2
+Player.Soldier76
+if (EventPlayer().trackSoldierState != null)
+{
+    StartDamageOverTime(PlayersWithinRadius(EventPlayer(), 4.5, Team.Team1, RadiusLOS.SurfacesAndEnemyBarriers), EventPlayer(), 1, 50);
+    Wait(1);
+    Loop();
+}
