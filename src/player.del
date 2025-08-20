@@ -1,7 +1,25 @@
 Number isPlayer(in Player player = EventPlayer()): SlotOf(player) <= EvaluateOnce(NumberOfSlots(Team.Team1) - 1);
 
+playervar Boolean canSpawn = true;
+playervar Boolean isDeadInRound = false;
+
 rule: '[player.del] Setup Player'
 Event.OngoingPlayer Team.Team1
 {
     DisableGameModeHud();
+}
+
+rule: '[player.del] Toggle Player Spawn'
+Event.OngoingPlayer Team.Team1
+if (EventPlayer().canSpawn)
+{
+    EnableRespawning(EventPlayer());
+    WaitUntil(EventPlayer().canSpawn == false, 9999);
+    DisableRespawning(EventPlayer());
+}
+
+rule: '[player.del] Toggle Player Death in Round'
+Event.OnDeath Team.Team1
+{
+    EventPlayer().isDeadInRound = true;
 }

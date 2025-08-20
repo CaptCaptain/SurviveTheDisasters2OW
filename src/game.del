@@ -49,7 +49,7 @@ class Game {
     public static void breakTime() {
         currentGameState = GameState.BREAK_TIME;
         currentRound += 1;
-        HeroInfo.showInfo();
+        #HeroInfo.showInfo();
         SetTeamScore(Team.Team2, 20);
         WaitUntil(IsGameInProgress(), 9999);
         Hud.updateDescription("Get Ready");
@@ -62,7 +62,7 @@ class Game {
     public static void intermission() {
         currentGameState = GameState.INTERMISSION;
         currentRound += 1;
-        HeroInfo.showInfo();
+        #HeroInfo.showInfo();
         WaitUntil(IsGameInProgress(), 9999);
         Hud.updateDescription("Next Disaster In");
         SetMatchTime(30);
@@ -77,17 +77,29 @@ class Game {
         Hud.updateDescription("Results");
         Hud.updateTimerString("");
 
-        BigMessage(AllLivingPlayers(Team.Team1), "Survived!");
+        Player[] livingPlayers: AllLivingPlayers(Team.Team1).Filter(player => !player.isDeadInRound);
+        BigMessage(livingPlayers, "Survived!");
+        
+        // Local Player does not work with PlayEffect
+        PlayEffect(livingPlayers[0], PlayEffect.BuffExplosionSound, Team.All, livingPlayers[0].Position(), 10000);
+        PlayEffect(livingPlayers[1], PlayEffect.BuffExplosionSound, Team.All, livingPlayers[1].Position(), 10000);
+        PlayEffect(livingPlayers[2], PlayEffect.BuffExplosionSound, Team.All, livingPlayers[2].Position(), 10000);
+        PlayEffect(livingPlayers[3], PlayEffect.BuffExplosionSound, Team.All, livingPlayers[3].Position(), 10000);
+        PlayEffect(livingPlayers[4], PlayEffect.BuffExplosionSound, Team.All, livingPlayers[4].Position(), 10000);
+        PlayEffect(livingPlayers[5], PlayEffect.BuffExplosionSound, Team.All, livingPlayers[5].Position(), 10000);
+
+        Player[] deadPlayers: AllPlayers(Team.Team1).Filter(player => player.isDeadInRound);
+        BigMessage(deadPlayers, "Wipeout!");
 
         // Local Player does not work with PlayEffect
-        PlayEffect(PlayersInSlot(0, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(0, Team.Team1).Position(), 10000);
-        PlayEffect(PlayersInSlot(1, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(1, Team.Team1).Position(), 10000);
-        PlayEffect(PlayersInSlot(2, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(2, Team.Team1).Position(), 10000);
-        PlayEffect(PlayersInSlot(3, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(3, Team.Team1).Position(), 10000);
-        PlayEffect(PlayersInSlot(4, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(4, Team.Team1).Position(), 10000);
-        PlayEffect(PlayersInSlot(5, Team.Team1), PlayEffect.BuffExplosionSound, Team.All, PlayersInSlot(5, Team.Team1).Position(), 10000);
+        PlayEffect(deadPlayers[0], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[0].Position(), 10000);
+        PlayEffect(deadPlayers[1], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[1].Position(), 10000);
+        PlayEffect(deadPlayers[2], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[2].Position(), 10000);
+        PlayEffect(deadPlayers[3], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[3].Position(), 10000);
+        PlayEffect(deadPlayers[4], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[4].Position(), 10000);
+        PlayEffect(deadPlayers[5], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[5].Position(), 10000);
 
-        Wait(3);
+        Wait(3.5);
     }
 
     public static void startRound() {
@@ -122,7 +134,10 @@ rule: '[game.del] Setup Game'
     while (true) {
         Game.startRound();
         Disasters.endDisaster();
+        AllPlayers(Team.Team1).canSpawn = true;
+        Respawn(AllDeadPlayers(Team.Team1));
         Game.results();
+        AllPlayers(Team.Team1).isDeadInRound = false;
         Game.intermission();
         Wait(0.016);
     }
