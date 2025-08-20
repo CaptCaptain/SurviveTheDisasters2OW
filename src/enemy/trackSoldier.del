@@ -85,6 +85,7 @@ Player.Soldier76
 if (EventPlayer().trackSoldierState != null)
 {
     StartDamageOverTime(PlayersWithinRadius(EventPlayer(), 4.5, Team.Team1, RadiusLOS.SurfacesAndEnemyBarriers), EventPlayer(), 1, 50);
+    StartHealOverTime(EventPlayer(), EventPlayer(), 1, 50);
     Wait(1);
     Loop();
 }

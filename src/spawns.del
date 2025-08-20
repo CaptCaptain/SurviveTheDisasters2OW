@@ -14,6 +14,8 @@ class Spawns {
     public static Vector getClosestSpawnToPlayer(Player player, Number maxDistance = 3): SpawnPositions.Sort(element => DistanceBetween(element, player.Position()))[RandomInteger(1, Min(maxDistance, CountOf(SpawnPositions) - 1))];
 
     public static Vector getClosestSpawnToPosition(Vector position, Number maxDistance = 3): SpawnPositions.Sort(element => DistanceBetween(element, position))[RandomInteger(1, Min(maxDistance, CountOf(SpawnPositions) - 1))];
+
+    public static Vector getClosestTeamSpawnToPosition(Vector position, Number minimumDistance = 0, Number maxDistance = 3): NearestWalkablePosition(SpawnPoints(Team.All).Sort(element => DistanceBetween(element, position))[RandomInteger(minimumDistance, Min(maxDistance, CountOf(SpawnPoints(Team.All)) - 1))]);
 }
 
 rule: '[spawns.del] Setup Team Spawns'

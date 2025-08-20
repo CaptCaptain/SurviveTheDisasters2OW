@@ -5,6 +5,7 @@ class DebugHud {
 }
 
 rule: '[debug.del] Setup'
+if (GameSettings.debugMode)
 {
     DebugHud.setup();
 }
