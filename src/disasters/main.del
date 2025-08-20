@@ -40,7 +40,8 @@ enum DisasterId {
     BOUNTY_HUNTER,
     SUN_WARRIOR,
     PETAL,
-    TRACK_AND_FIELD
+    TRACK_AND_FIELD,
+    FOUR_CORNERS
 }
 
 class Disasters {
