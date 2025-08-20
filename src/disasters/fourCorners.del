@@ -1,0 +1,75 @@
+single struct FourCornersDisasterData {
+    public Number index;
+    public Vector[] positions;
+    public Color[] colors;
+    public Number[] effects;
+    public Number[] icons;
+    public Number[] progressHudTexts;
+    public Player bomb;
+}
+
+globalvar FourCornersDisasterData FourCornersDisaster = new FourCornersDisasterData();
+
+rule: '[disasters/fourCorners.del] Four Corners Disaster Setup'
+{
+    Disasters.registerDisaster(DisasterId.FOUR_CORNERS, "Four Corners", Color.Turquoise, TX.getString("C00000000017EF8"), DisasterType.none, 30, disasterPool);
+}
+
+rule: '[disasters/fourCorners.del] Four Corners Disaster Start'
+if (activeDisasters.Contains(<Number>DisasterId.FOUR_CORNERS))
+if (isDisasterActive) 
+{
+    FourCornersDisaster.index = 0;
+    FourCornersDisaster.positions = [Spawns.getClosestTeamSpawnToPosition(Forward() * 1000, 0, 1), Spawns.getClosestTeamSpawnToPosition(Backward() * 1000, 0, 1), Spawns.getClosestTeamSpawnToPosition(Left() * 1000, 0, 1), Spawns.getClosestTeamSpawnToPosition(Right() * 1000, 0, 1)].Randomize();
+    FourCornersDisaster.colors = [Color.Red, Color.Green, Color.Blue, Color.Yellow].Randomize();
+
+    for (FourCornersDisaster.index = 0; CountOf(FourCornersDisaster.positions); 1) {
+        LastCreated.wrap(() => {
+            CreateEffect(AllPlayers(), Effect.Ring, EvaluateOnce(FourCornersDisaster.colors[FourCornersDisaster.index]), EvaluateOnce(FourCornersDisaster.positions[FourCornersDisaster.index]), 5, EffectRev.VisibleToPositionAndRadius);
+        }, LastCreatedEntity(), FourCornersDisaster.effects);
+
+        LastCreated.wrap(() => {
+            CreateIcon(AllPlayers(), EvaluateOnce(FourCornersDisaster.positions[FourCornersDisaster.index]), Icon.Halo, IconRev.VisibleToPositionAndColor, EvaluateOnce(FourCornersDisaster.colors[FourCornersDisaster.index]), true);
+        }, LastCreatedEntity(), FourCornersDisaster.icons);
+    }
+
+    LastCreated.wrap(() => {
+        CreateProgressBarHudText(AllPlayers(), 100 * ((20 - AbsoluteValue(EvaluateOnce(MatchTime()) - MatchTime())) / 20), "Get to a corner!", Location.Top, 8, FourCornersDisaster.colors[RoundToInteger(MatchTime() % 4, Rounding.Down)], Color.White, ProgressBarHudEvaluation.VisibleToValuesAndColor);
+    }, LastTextID(), FourCornersDisaster.progressHudTexts);
+
+    CreateDummyBot(Hero.Dva, Team.Team2, -1, FourCornersDisaster.positions.Random(), null);
+    FourCornersDisaster.bomb = LastCreatedEntity();
+    StartForcingDummyBotName(FourCornersDisaster.bomb, ["Hana Song", "MEKA Ace", "D.Va"].Random());
+    SetInvisible(FourCornersDisaster.bomb, InvisibleTo.All);
+    SetStatus(FourCornersDisaster.bomb, null, Status.PhasedOut, 9999);
+    SetDamageDealt(FourCornersDisaster.bomb, 10000);
+
+    WaitUntil(!isDisasterActive, 20);
+
+    for (FourCornersDisaster.index = 0; CountOf(FourCornersDisaster.progressHudTexts); 1) {
+        DestroyProgressBarHudText(FourCornersDisaster.progressHudTexts[FourCornersDisaster.index]);
+    }
+
+    for (FourCornersDisaster.index = 0; CountOf(FourCornersDisaster.positions); 1) {
+        LastCreated.wrap(() => {
+            CreateEffect(AllPlayers(), Effect.Sphere, EvaluateOnce(FourCornersDisaster.colors[FourCornersDisaster.index]), EvaluateOnce(FourCornersDisaster.positions[FourCornersDisaster.index]), 5, EffectRev.VisibleToPositionAndRadius);
+        }, LastCreatedEntity(), FourCornersDisaster.effects);
+    }
+
+    Teleport(FourCornersDisaster.bomb, FourCornersDisaster.positions.Random());
+    SetUltimateCharge(FourCornersDisaster.bomb, 100);
+    PressButton(FourCornersDisaster.bomb, Button.Ultimate);
+    SetStatus(PlayersWithinRadius(FourCornersDisaster.bomb, 5, Team.Team1, RadiusLOS.Surfaces), null, Status.Hacked, 3);
+
+    while (isDisasterActive) {
+        Kill(AllPlayers(Team.Team1).Remove(PlayersWithinRadius(FourCornersDisaster.positions[0], 5, Team.Team1, RadiusLOS.Off)).Remove(PlayersWithinRadius(FourCornersDisaster.positions[1], 5, Team.Team1, RadiusLOS.Off)).Remove(PlayersWithinRadius(FourCornersDisaster.positions[2], 5, Team.Team1, RadiusLOS.Off)).Remove(PlayersWithinRadius(FourCornersDisaster.positions[3], 5, Team.Team1, RadiusLOS.Off)));
+        Wait(0.25);
+    }
+
+    for (FourCornersDisaster.index = 0; CountOf(FourCornersDisaster.effects); 1) {
+        DestroyEffect(FourCornersDisaster.effects[FourCornersDisaster.index]);
+    }
+    for (FourCornersDisaster.index = 0; CountOf(FourCornersDisaster.icons); 1) {
+        DestroyIcon(FourCornersDisaster.icons[FourCornersDisaster.index]);
+    }
+}
