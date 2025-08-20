@@ -118,7 +118,7 @@ class Game {
         Disasters.startDisaster();
         SetMatchTime(selectedDisaster.duration);
         Wait(0.016);
-        WaitUntil(MatchTime() <= 0, 9999);
+        WaitUntil(MatchTime() <= 0 || AllPlayers(Team.Team1).All(player => player.isDeadInRound), 9999);
         disasterSelectIndex += 1;
 
         if (disasterSelectIndex >= CountOf(disasterPool)) {

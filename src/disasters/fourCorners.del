@@ -22,6 +22,7 @@ if (isDisasterActive)
     FourCornersDisaster.index = 0;
     FourCornersDisaster.positions = [Spawns.getClosestTeamSpawnToPosition(Forward() * 1000, 0, 1), Spawns.getClosestTeamSpawnToPosition(Backward() * 1000, 0, 1), Spawns.getClosestTeamSpawnToPosition(Left() * 1000, 0, 1), Spawns.getClosestTeamSpawnToPosition(Right() * 1000, 0, 1)].Randomize();
     FourCornersDisaster.colors = [Color.Red, Color.Green, Color.Blue, Color.Yellow].Randomize();
+    AllPlayers().canSpawn = false;
 
     for (FourCornersDisaster.index = 0; CountOf(FourCornersDisaster.positions); 1) {
         LastCreated.wrap(() => {
