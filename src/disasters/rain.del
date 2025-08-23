@@ -47,7 +47,6 @@ if (isDisasterActive)
             Teleport(RainDisaster.bombs[RainDisaster.index], Spawns.getClosestSpawnToPosition(AllLivingPlayers(Team.Team1).Random().Position(), 5) + (Up() * 30));
             SetFacing(RainDisaster.bombs[RainDisaster.index], Down());
             StartThrottleInDirection(RainDisaster.bombs[RainDisaster.index], Vector(RandomReal(-1, 1), 0, RandomReal(-1, 1)), directionMagnitude);
-            Resurrect(RainDisaster.bombs[RainDisaster.index]);
 
             Wait(0.016);
         }
