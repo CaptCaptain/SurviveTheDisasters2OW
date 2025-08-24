@@ -1,11 +1,13 @@
 single struct WorkshopSettings {
     public Boolean debugMode;
     public Number maxRounds;
+    public Number specialRound;
 
     public static WorkshopSettings New() {
         return {
             debugMode: WorkshopSettingToggle("Game", "Debug", false, 0),
-            maxRounds: WorkshopSettingInteger("Game", "Max Rounds", 20, 5, 30)
+            maxRounds: WorkshopSettingInteger("Game", "Max Rounds", 20, 5, 30),
+            specialRound: [1, 2, 5, 10][WorkshopSettingCombo("Game", "Special Round", 0, ["Every Round", "Every Two Rounds", "Every Five Rounds", "Every Ten Rounds"], 0)]
         };
     }
 }

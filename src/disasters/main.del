@@ -5,13 +5,15 @@ single struct DisasterData {
     public String icon;
     public String type;
     public Number duration;
-    public static DisasterData New(in Number id = 0, in String name = "", in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30): {
+    public Number[] excludedDisasters;
+    public static DisasterData New(in Number id = 0, in String name = "", in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30, in Number[] excludedDisasters = []): {
         id: id,
         name: name,
         color: color,
         icon: icon,
         type: type,
-        duration: duration
+        duration: duration,
+        excludedDisasters: excludedDisasters
     };
 }
 
@@ -21,7 +23,7 @@ globalvar Number[] hardcoreDisasterPool = [];
 globalvar Number[] bossHuntDisasterPool = [];
 globalvar Number[] activeDisasters = [];
 globalvar Boolean isDisasterActive = false;
-globalvar Number disasterIndex = 0;
+globalvar Number disasterDisplayIndex = 0;
 globalvar Number disasterSFXIndex = 0;
 
 class DisasterType {
@@ -64,8 +66,8 @@ class Disasters {
     public static Color getDisasterColor(in Number id): getDisaster(id).color;
 
     public static void displayDisasters() {
-        for (disasterIndex = 0; CountOf(activeDisasters); 1) {
-            Hud.updateName(formatObjectiveNameString("{0} {1}".Format([getDisasterIcon(activeDisasters[disasterIndex]), getDisasterName(activeDisasters[disasterIndex])])));
+        for (disasterDisplayIndex = 0; CountOf(activeDisasters); 1) {
+            Hud.updateName(formatObjectiveNameString("{0} {1}".Format([getDisasterIcon(activeDisasters[disasterDisplayIndex]), getDisasterName(activeDisasters[disasterDisplayIndex])])));
 
             if (CountOf(activeDisasters) == 2) {
                 Hud.updateType(DisasterType.double);
@@ -73,9 +75,9 @@ class Disasters {
                 Hud.updateType(DisasterType.triple);
             } else if (CountOf(activeDisasters) > 3) {
                 Hud.updateType(TextColor.Purple("Disaster × {0}".Format([CountOf(activeDisasters)])));
-            } else { Hud.updateType(getDisasterType(activeDisasters[disasterIndex])); }
+            } else { Hud.updateType(getDisasterType(activeDisasters[disasterDisplayIndex])); }
 
-            Hud.updateColor(getDisasterColor(activeDisasters[disasterIndex]));
+            Hud.updateColor(getDisasterColor(activeDisasters[disasterDisplayIndex]));
 
             // Local Player does not work with PlayEffect
             for (disasterSFXIndex = 0; disasterSFXIndex < CountOf(AllPlayers(Team.Team1)); disasterSFXIndex++) {

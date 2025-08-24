@@ -8,28 +8,44 @@ enum GameState {
 
 globalvar DisasterData selectedDisaster;
 globalvar Number disasterSelectIndex;
+globalvar Number[] excludedDisasters;
 globalvar Number disasterNameStringIndex;
 globalvar String disasterNameString;
-globalvar String[] disasterNames;
+globalvar String[] disasterNames = [];
 globalvar GameState currentGameState = GameState.WAITING_FOR_PLAYERS;
 globalvar Number currentRound = 0;
 globalvar Number maxRounds = 20;
 
-void updateDisasterString(in String[] names) {
-    disasterNames = names;
-    updateDisasterString();
-}
-
 void updateDisasterString() "[game.del] Subroutine updateDisasterString" {
+    LogToInspector(CountOf(disasterNames));
     if (CountOf(disasterNames) <= 1) {
         disasterNameString = disasterNames[0];
         return;
     }
-    for (disasterNameStringIndex = 0; disasterNameStringIndex < CountOf(disasterNames) - 1; disasterNameStringIndex++) {
+    disasterNameString = disasterNames[0];
+    for (disasterNameStringIndex = 1; CountOf(disasterNames) - 1; 1) {
         disasterNameString = disasterNameString + ", " + disasterNames[disasterNameStringIndex];
     }
-    disasterNameString = disasterNameString + ", and " + disasterNames[CountOf(disasterNames)];
+    disasterNameString = disasterNameString + ", and " + disasterNames[CountOf(disasterNames) - 1];
+    disasterNames = [];
     return;
+}
+
+void addDisaster() "[game.del] Subroutine addDisaster" {
+    selectedDisaster = Disasters.getDisaster(disasterPool[disasterSelectIndex]);
+    disasterNames.ModAppend(selectedDisaster.name);
+    Disasters.addDisaster(selectedDisaster);
+}
+
+void addRandomDisaster() "[game.del] Subroutine addRandomDisaster" {
+    selectedDisaster = Disasters.getDisaster(disasterPool.Remove(activeDisasters).Random());
+    excludedDisasters.ModAppend(selectedDisaster.excludedDisasters);
+
+    Boolean selectedDisasterIsExcluded = excludedDisasters.Contains(selectedDisaster.id);
+
+    if (selectedDisaster == null || selectedDisasterIsExcluded) return;
+    disasterNames.ModAppend(selectedDisaster.name);
+    Disasters.addDisaster(selectedDisaster);
 }
 
 class Game {
@@ -102,16 +118,31 @@ class Game {
         Wait(3.5);
     }
 
+    public static void selectDisaster() {
+        addDisaster();
+    }
+
+    public static void selectRandomDisaster() {
+        addRandomDisaster();
+    }
+
     public static void startRound() {
         currentGameState = GameState.IN_BETWEEN;
         ReadyUp.end();
         HeroInfo.hideInfo();
         Hud.updateDescription("");
         Hud.updateTimerString("");
-        selectedDisaster = Disasters.getDisaster(disasterPool[disasterSelectIndex]);
-        Disasters.addDisaster(selectedDisaster);
+
+        if (currentRound % GameSettings.specialRound == 0) {
+            while (CountOf(activeDisasters) < 5) {
+                selectRandomDisaster();
+                Wait(0.016);
+            }
+        } else {
+            selectDisaster();
+        }
         Disasters.displayDisasters();
-        updateDisasterString([selectedDisaster.name]);
+        updateDisasterString();
 
         currentGameState = GameState.ROUND;
         Hud.updateDescription(disasterNameString);
