@@ -9,7 +9,7 @@ globalvar SunWarriorDisasterData SunWarriorDisaster = new SunWarriorDisasterData
 
 rule: '[disasters/sunWarrior.del] Sun Warrior Disaster Setup'
 {
-    Disasters.registerDisaster(DisasterId.SUN_WARRIOR, "Sun Warrior", Color.Yellow, TX.getString("C0000000005E4E7"), DisasterType.bossHunt, 60, disasterPool);
+    Disasters.registerDisaster(id: DisasterId.SUN_WARRIOR, name: "Sun Warrior", color: Color.Yellow, icon: TX.getString("C0000000005E4E7"), type: DisasterType.bossHunt, duration: 60, excludedDisasters: [], playersCanRespawn: false, pool: disasterPool);
 }
 
 rule: '[disasters/sunWarrior.del] Sun Warrior Disaster'

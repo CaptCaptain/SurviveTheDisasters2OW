@@ -5,15 +5,17 @@ single struct DisasterData {
     public String icon;
     public String type;
     public Number duration;
+    public Boolean playersCanRespawn;
     public Number[] excludedDisasters;
-    public static DisasterData New(in Number id = 0, in String name = "", in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30, in Number[] excludedDisasters = []): {
+    public static DisasterData New(in Number id = 0, in String name = "", in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30, in Number[] excludedDisasters = [], in Boolean playersCanRespawn = true): {
         id: id,
         name: name,
         color: color,
         icon: icon,
         type: type,
         duration: duration,
-        excludedDisasters: excludedDisasters
+        excludedDisasters: excludedDisasters,
+        playersCanRespawn: playersCanRespawn
     };
 }
 
@@ -93,8 +95,8 @@ class Disasters {
         Hud.updateColor(Color.White);
     }
 
-    public static void registerDisaster(in Number | DisasterId id, in String name, in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30, ref Number[] pool) {
-        disasters.ModAppend(DisasterData.New(id, name, color, icon, type, duration));
+    public static void registerDisaster(in Number | DisasterId id, in String name, in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30, in Number[] excludedDisasters, in Boolean playersCanRespawn, ref Number[] pool) {
+        disasters.ModAppend(DisasterData.New(id, name, color, icon, type, duration, excludedDisasters, playersCanRespawn));
         pool.ModAppend(id);
         pool = pool.Randomize();
     }

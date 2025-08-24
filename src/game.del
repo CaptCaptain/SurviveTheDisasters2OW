@@ -11,8 +11,10 @@ globalvar Number disasterSelectIndex;
 globalvar Number[] excludedDisasters;
 globalvar Number disasterNameStringIndex;
 globalvar String disasterNameString;
+globalvar Boolean playersCanRespawnInDisaster;
 globalvar String[] disasterNames = [];
 globalvar GameState currentGameState = GameState.WAITING_FOR_PLAYERS;
+globalvar Number roundDuration = 0;
 globalvar Number currentRound = 0;
 globalvar Number maxRounds = 20;
 
@@ -34,6 +36,12 @@ void updateDisasterString() "[game.del] Subroutine updateDisasterString" {
 void addDisaster() "[game.del] Subroutine addDisaster" {
     selectedDisaster = Disasters.getDisaster(disasterPool[disasterSelectIndex]);
     disasterNames.ModAppend(selectedDisaster.name);
+
+    if (!selectedDisaster.playersCanRespawn)
+        playersCanRespawnInDisaster = false;
+
+    roundDuration = selectedDisaster.duration;
+
     Disasters.addDisaster(selectedDisaster);
 }
 
@@ -46,6 +54,7 @@ void addRandomDisaster() "[game.del] Subroutine addRandomDisaster" {
     if (selectedDisaster == null || selectedDisasterIsExcluded) return;
     disasterNames.ModAppend(selectedDisaster.name);
     Disasters.addDisaster(selectedDisaster);
+    roundDuration = roundDuration + selectedDisaster.duration / 2;
 }
 
 class Game {
@@ -134,20 +143,25 @@ class Game {
         Hud.updateTimerString("");
 
         if (currentRound % GameSettings.specialRound == 0) {
-            while (CountOf(activeDisasters) < 5) {
+            while (CountOf(activeDisasters) < EvaluateOnce(RandomInteger(2, 3))) {
                 selectRandomDisaster();
                 Wait(0.016);
             }
+            playersCanRespawnInDisaster = false;
         } else {
             selectDisaster();
         }
         Disasters.displayDisasters();
         updateDisasterString();
 
+        if (!playersCanRespawnInDisaster) {
+            AllPlayers(Team.Team1).canSpawn = true;
+        }
+
         currentGameState = GameState.ROUND;
         Hud.updateDescription(disasterNameString);
         Disasters.startDisaster();
-        SetMatchTime(selectedDisaster.duration);
+        SetMatchTime(roundDuration);
         Wait(0.016);
         WaitUntil(MatchTime() <= 0 || AllPlayers(Team.Team1).All(player => player.isDeadInRound), 9999);
         disasterSelectIndex += 1;
@@ -166,7 +180,9 @@ rule: '[game.del] Setup Game'
         Game.startRound();
         Disasters.endDisaster();
         AllPlayers(Team.Team1).canSpawn = true;
+        playersCanRespawnInDisaster = true;
         Respawn(AllDeadPlayers(Team.Team1));
+        roundDuration = 0;
         Game.results();
         AllPlayers(Team.Team1).isDeadInRound = false;
         Game.intermission();
