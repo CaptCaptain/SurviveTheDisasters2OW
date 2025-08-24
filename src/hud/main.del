@@ -55,6 +55,7 @@ rule: '[hud.del] Setup Hud'
 rule: '[hud.del] Update Objective Timer'
 {
     WaitUntil(currentGameState != GameState.IN_BETWEEN, 9999);
+    if (currentGameState == GameState.IN_BETWEEN) Loop();
     Hud.updateTimer(RoundToInteger(MatchTime(), Rounding.Nearest));
     WaitUntil(MatchTime() != EvaluateOnce(MatchTime()), 1);
     Loop();

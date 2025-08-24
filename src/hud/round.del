@@ -1,6 +1,6 @@
 class RoundHud {
     public static void setup() {
-        CreateHudText(AllPlayers(), EvaluateOnce(""), TextColor.Gray("{0} Round {1} | {2}\n".Format([TX.getString("C0000000004516D"), currentRound, maxRounds])) + Text.leftAlignString(), EvaluateOnce(""), Location.Left, -1, EvaluateOnce(Color.White), EvaluateOnce(Color.White), EvaluateOnce(Color.White), HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
+        CreateHudText(AllPlayers(), EvaluateOnce(""), TextColor.Gray("{0} Round {1} | {2}\n".Format([TX.getString("C0000000004516D"), currentRound, GameSettings.maxRounds])) + Text.leftAlignString(), EvaluateOnce(""), Location.Left, -1, EvaluateOnce(Color.White), EvaluateOnce(Color.White), EvaluateOnce(Color.White), HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
     }
 }
 

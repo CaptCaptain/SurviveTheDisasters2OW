@@ -16,7 +16,6 @@ globalvar String[] disasterNames = [];
 globalvar GameState currentGameState = GameState.WAITING_FOR_PLAYERS;
 globalvar Number roundDuration = 0;
 globalvar Number currentRound = 0;
-globalvar Number maxRounds = 20;
 
 void updateDisasterString() "[game.del] Subroutine updateDisasterString" {
     LogToInspector(CountOf(disasterNames));
@@ -56,7 +55,7 @@ void addRandomDisaster() "[game.del] Subroutine addRandomDisaster" {
     disasterNames.ModAppend(selectedDisaster.name);
     Disasters.addDisaster(selectedDisaster);
     roundDuration = roundDuration + selectedDisaster.duration / 2;
-    roundDuration = Min(60, roundDuration);
+    roundDuration = Min(30, roundDuration);
 }
 
 class Game {
@@ -89,9 +88,22 @@ class Game {
     public static void intermission() {
         currentGameState = GameState.INTERMISSION;
         currentRound += 1;
+
         #HeroInfo.showInfo();
         WaitUntil(IsGameInProgress(), 9999);
-        Hud.updateDescription("Next Disaster In");
+
+        if (currentRound % GameSettings.specialRound == 0) {
+            currentGameState = GameState.IN_BETWEEN;
+            BigMessage(AllPlayers(Team.Team1), "Warning!!!");
+            Hud.updateDescription("");
+            Hud.updateTimerString("");
+            Wait(3.5);
+            currentGameState = GameState.INTERMISSION;
+            Hud.updateDescription("Warning!!!");
+        } else {
+            Hud.updateDescription("Next Disaster In");
+        }
+
         SetMatchTime(30);
         Wait(0.016);
         ReadyUp.start();
@@ -127,6 +139,10 @@ class Game {
         PlayEffect(deadPlayers[5], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[5].Position(), 10000);
 
         Wait(3.5);
+
+        if (currentRound >= GameSettings.maxRounds) {
+            DeclareTeamVictory(Team.Team1);
+        }
     }
 
     public static void selectDisaster() {
