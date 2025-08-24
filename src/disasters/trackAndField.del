@@ -10,7 +10,7 @@ globalvar TrackDisasterData TrackDisaster = new TrackDisasterData();
 
 rule: '[disasters/trackAndField.del] Track and Field Disaster Setup'
 {
-    Disasters.registerDisaster(id: DisasterId.TRACK_AND_FIELD, name: "Track and Field", color: Color.LimeGreen, icon: TX.getString("C0000000000333A"), type: DisasterType.none, duration: 25, excludedDisasters: [], playersCanRespawn: false, pool: disasterPool);
+    Disasters.registerDisaster(id: DisasterId.TRACK_AND_FIELD, name: "Track and Field", color: Color.LimeGreen, icon: TX.getString("C0000000000333A"), type: DisasterType.none, duration: 25, excludedDisasters: [], pool: disasterPool);
 }
 
 rule: '[disasters/trackAndField.del] Track and Field Disaster'

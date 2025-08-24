@@ -11,7 +11,7 @@ globalvar Number disasterSelectIndex;
 globalvar Number[] excludedDisasters;
 globalvar Number disasterNameStringIndex;
 globalvar String disasterNameString;
-globalvar Boolean playersCanRespawnInDisaster;
+globalvar Boolean playersCanRespawnInDisaster = true;
 globalvar String[] disasterNames = [];
 globalvar GameState currentGameState = GameState.WAITING_FOR_PLAYERS;
 globalvar Number roundDuration = 0;
@@ -22,6 +22,7 @@ void updateDisasterString() "[game.del] Subroutine updateDisasterString" {
     LogToInspector(CountOf(disasterNames));
     if (CountOf(disasterNames) <= 1) {
         disasterNameString = disasterNames[0];
+        disasterNames = [];
         return;
     }
     disasterNameString = disasterNames[0];
@@ -55,6 +56,7 @@ void addRandomDisaster() "[game.del] Subroutine addRandomDisaster" {
     disasterNames.ModAppend(selectedDisaster.name);
     Disasters.addDisaster(selectedDisaster);
     roundDuration = roundDuration + selectedDisaster.duration / 2;
+    roundDuration = Min(60, roundDuration);
 }
 
 class Game {
@@ -155,7 +157,7 @@ class Game {
         updateDisasterString();
 
         if (!playersCanRespawnInDisaster) {
-            AllPlayers(Team.Team1).canSpawn = true;
+            AllPlayers(Team.Team1).canSpawn = false;
         }
 
         currentGameState = GameState.ROUND;
@@ -179,8 +181,8 @@ rule: '[game.del] Setup Game'
     while (true) {
         Game.startRound();
         Disasters.endDisaster();
-        AllPlayers(Team.Team1).canSpawn = true;
         playersCanRespawnInDisaster = true;
+        AllPlayers(Team.Team1).canSpawn = true;
         Respawn(AllDeadPlayers(Team.Team1));
         roundDuration = 0;
         Game.results();

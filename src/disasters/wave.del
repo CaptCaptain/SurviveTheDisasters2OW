@@ -8,7 +8,7 @@ globalvar WaveDisasterData WaveDisaster = new WaveDisasterData();
 
 rule: '[disasters/wave.del] Wave Disaster Setup'
 {
-    Disasters.registerDisaster(id: DisasterId.WAVE, name: "Tsunami", color: Color.SkyBlue, icon: TX.getString("C000000000655DE"), type: DisasterType.none, duration: 25, excludedDisasters: [], playersCanRespawn: false, pool: disasterPool);
+    Disasters.registerDisaster(id: DisasterId.WAVE, name: "Tsunami", color: Color.SkyBlue, icon: TX.getString("C000000000655DE"), type: DisasterType.none, duration: 25, excludedDisasters: [], pool: disasterPool);
 }
 
 rule: '[disasters/wave.del] Wave Disaster'

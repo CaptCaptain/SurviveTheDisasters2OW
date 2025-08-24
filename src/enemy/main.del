@@ -1,5 +1,5 @@
 enum BotState { NULL, IDLE, ATTACKING, SPAWNING, DEAD }
-enum BotEvent { NULL, ENEMY_LOCATED, ENEMY_LOST }
+enum BotEvent { NULL, ENEMY_LOCATED, ENEMY_LOST, DIED }
 
 single struct Bot {
     public Player target;
@@ -54,6 +54,9 @@ void handleIdleState() "[enemy/main.del] Subroutine handleIdleState" {
             StopFacing(EventPlayer());
             StopThrottleInDirection(EventPlayer());
             break;
+        case BotEvent.DIED:
+            StateMachine<BotState, BotEvent>.setState(EventPlayer().botState, BotState.DEAD);
+            break;
     }
 }
 
@@ -94,6 +97,9 @@ void handleAttackingState() "[enemy/main.del] Subroutine handleAttackingState" {
             StopThrottleInDirection(EventPlayer());
             StateMachine<BotState, BotEvent>.setState(EventPlayer().botState, BotState.IDLE);
             break;
+        case BotEvent.DIED:
+            StateMachine<BotState, BotEvent>.setState(EventPlayer().botState, BotState.DEAD);
+            break;
     }
 }
 
@@ -101,6 +107,7 @@ void handleDeadState() "[enemy/main.del] Subroutine handleDeadState" {
     Bot.setTarget(EventPlayer(), null);
     StopThrottleInDirection(EventPlayer());
     WaitUntil(EventPlayer().IsAlive(), 9999);
+    Teleport(EventPlayer(), Spawns.getClosestSpawnToPlayer(AllPlayers(Team.Team1).Random(), 3));
     StateMachine<BotState, BotEvent>.setState(EventPlayer().botState, BotState.IDLE);
 }
 
@@ -121,4 +128,14 @@ if (EventPlayer().botState != null)
     Wait(Max(RandomReal(0.25, 0.5), ServerLoadAverage() / 255));
 
     LoopIfConditionIsTrue();
+}
+
+rule: '[enemy/main.del]: Dead'
+Event.OnDeath
+Team.Team2
+Player.All
+if (EventPlayer().bot != null)
+if (EventPlayer().botState != null)
+{
+    StateMachine<BotState, BotEvent>.dispatchEvent(EventPlayer().botState, eventHandler: handleEvent, event: BotEvent.DIED);
 }

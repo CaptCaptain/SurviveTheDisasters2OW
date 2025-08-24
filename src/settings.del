@@ -7,7 +7,7 @@ single struct WorkshopSettings {
         return {
             debugMode: WorkshopSettingToggle("Game", "Debug", false, 0),
             maxRounds: WorkshopSettingInteger("Game", "Max Rounds", 20, 5, 30),
-            specialRound: [1, 2, 5, 10][WorkshopSettingCombo("Game", "Special Round", 0, ["Every Round", "Every Two Rounds", "Every Five Rounds", "Every Ten Rounds"], 0)]
+            specialRound: [1, 2, 5, 10][WorkshopSettingCombo("Game", "Special Round", 2, ["Every Round", "Every Two Rounds", "Every Five Rounds", "Every Ten Rounds"], 0)]
         };
     }
 }

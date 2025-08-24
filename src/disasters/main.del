@@ -95,7 +95,7 @@ class Disasters {
         Hud.updateColor(Color.White);
     }
 
-    public static void registerDisaster(in Number | DisasterId id, in String name, in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30, in Number[] excludedDisasters, in Boolean playersCanRespawn, ref Number[] pool) {
+    public static void registerDisaster(in Number | DisasterId id, in String name, in Color color = Color.White, in String icon = "", in String type = "", in Number duration = 30, in Number[] excludedDisasters = [], in Boolean playersCanRespawn = true, ref Number[] pool) {
         disasters.ModAppend(DisasterData.New(id, name, color, icon, type, duration, excludedDisasters, playersCanRespawn));
         pool.ModAppend(id);
         pool = pool.Randomize();

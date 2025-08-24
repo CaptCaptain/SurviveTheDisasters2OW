@@ -7,7 +7,7 @@ globalvar NuclearBombData NuclearBombDisaster = new NuclearBombData();
 
 rule: '[disasters/nuclearBomb.del] Nuclear Bomb Disaster Setup'
 {
-    Disasters.registerDisaster(id: DisasterId.NUCLEAR_BOMB, name: "Nuclear Bomb", color: Color.Rose, icon: TX.getString("C00000000004EA7"), type: DisasterType.none, duration: 10, excludedDisasters: [], playersCanRespawn: false, pool: disasterPool);
+    Disasters.registerDisaster(id: DisasterId.NUCLEAR_BOMB, name: "Nuclear Bomb", color: Color.Rose, icon: TX.getString("C00000000004EA7"), type: DisasterType.none, duration: 10, excludedDisasters: [], pool: disasterPool);
 }
 
 rule: '[disasters/nuclearBomb.del] Nuclear Bomb Disaster'

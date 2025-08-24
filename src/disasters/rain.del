@@ -8,7 +8,7 @@ globalvar RainDisasterData RainDisaster = new RainDisasterData();
 
 rule: '[disasters/Rain.del] Rain Disaster Setup'
 {
-    Disasters.registerDisaster(id: DisasterId.RAIN, name: "Explosive Rain", color: Color.Blue, icon: TX.getString("C00000000065133"), type: DisasterType.none, duration: 25, excludedDisasters: [], playersCanRespawn: false, pool: disasterPool);
+    Disasters.registerDisaster(id: DisasterId.RAIN, name: "Explosive Rain", color: Color.Blue, icon: TX.getString("C00000000065133"), type: DisasterType.none, duration: 25, excludedDisasters: [], pool: disasterPool);
 }
 
 rule: '[disasters/Rain.del] Rain Disaster'
