@@ -1,7 +1,7 @@
 globalvar Number[] HeroInfoTextIds = [];
 globalvar Number HeroInfoIndex = 0;
 
-void showHeroInfo() "[heroInfo.del] Subroutine showHeroInfo" {
+void showHeroInfo() "[hud/heroInfo.del] Subroutine showHeroInfo" {
     String subtextOpacity: "BF";
     LastCreated.wrap(() => {
         CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce(""), EvaluateOnce("\n" + "{0} | Modifiers".Format([TX.getString("C0000000005E4F0")]) + Text.leftAlignString()), Location.Left, 7);
@@ -44,7 +44,7 @@ void showHeroInfo() "[heroInfo.del] Subroutine showHeroInfo" {
     }, LastTextID(), HeroInfoTextIds);
 }
 
-void hideHeroInfo() "[heroInfo.del] Subroutine hideHeroInfo" {
+void hideHeroInfo() "[hud/heroInfo.del] Subroutine hideHeroInfo" {
     for (HeroInfoIndex = 0; CountOf(HeroInfoTextIds); 1) {
         DestroyHudText(HeroInfoTextIds[HeroInfoIndex]);
     }

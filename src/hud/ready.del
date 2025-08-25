@@ -36,7 +36,7 @@ class ReadyUp {
     }
 }
 
-rule: '[ready.del] Player Ready Up'
+rule: '[hud/ready.del] Player Ready Up'
 Event.OngoingPlayer
 Team.Team1
 Player.All
@@ -50,7 +50,7 @@ if (isPlayer(EventPlayer()))
     Communicate(EventPlayer(), Communication.Ready);
 }
 
-rule: '[ready.del] Bots Auto Ready'
+rule: '[hud/ready.del] Bots Auto Ready'
 Event.OnPlayerJoin
 Team.Team1
 if (isPlayer(EventPlayer()))

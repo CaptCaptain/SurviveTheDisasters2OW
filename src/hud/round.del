@@ -4,7 +4,7 @@ class RoundHud {
     }
 }
 
-rule: '[round.del] Round Hud Setup'
+rule: '[hud/round.del] Round Hud Setup'
 {
     RoundHud.setup();
 }

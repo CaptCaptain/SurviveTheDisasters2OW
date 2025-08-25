@@ -51,7 +51,7 @@ class Scoreboard {
     }
 }
 
-rule: '[scoreboard.del] Setup Scoreboard'
+rule: '[hud/scoreboard.del] Setup Scoreboard'
 Event.OnPlayerJoin Team.Team1
 if (isPlayer(EventPlayer()))
 {
@@ -62,7 +62,7 @@ if (isPlayer(EventPlayer()))
     Scoreboard.respawned();
 }
 
-rule: '[scoreboard.del] Update Scoreboard on Hero Change'
+rule: '[hud/scoreboard.del] Update Scoreboard on Hero Change'
 Event.OngoingPlayer Team.Team1
 if (isPlayer(EventPlayer()))
 {
@@ -72,7 +72,7 @@ if (isPlayer(EventPlayer()))
     Loop();
 }
 
-rule: '[scoreboard.del] Update Scoreboard on Ultimate Charge Change'
+rule: '[hud/scoreboard.del] Update Scoreboard on Ultimate Charge Change'
 Event.OngoingPlayer Team.Team1
 if (isPlayer(EventPlayer()))
 {
@@ -82,7 +82,7 @@ if (isPlayer(EventPlayer()))
     Loop();
 }
 
-rule: '[scoreboard.del] Update Scoreboard on Health Change'
+rule: '[hud/scoreboard.del] Update Scoreboard on Health Change'
 Event.OngoingPlayer Team.Team1
 if (isPlayer(EventPlayer()))
 {
@@ -92,7 +92,7 @@ if (isPlayer(EventPlayer()))
     Loop();
 }
 
-rule: '[scoreboard.del] Update Scoreboard on Death'
+rule: '[hud/scoreboard.del] Update Scoreboard on Death'
 Event.OngoingPlayer Team.Team1
 if (isPlayer(EventPlayer()))
 if (EventPlayer().isDeadInRound)

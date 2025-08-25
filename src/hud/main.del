@@ -47,7 +47,7 @@ class Hud {
     }
 }
 
-rule: '[hud.del] Setup Hud'
+rule: '[hud/main.del] Setup Hud'
 {
     Hud.setup();
 }

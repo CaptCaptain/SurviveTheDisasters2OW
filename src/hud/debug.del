@@ -4,7 +4,7 @@ class DebugHud {
     }
 }
 
-rule: '[debug.del] Setup'
+rule: '[hud/debug.del] Setup'
 if (GameSettings.debugMode)
 {
     DebugHud.setup();
