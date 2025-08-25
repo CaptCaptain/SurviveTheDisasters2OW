@@ -19,6 +19,7 @@ import "src/disasters/sunWarrior.del";
 import "src/disasters/trackAndField.del";
 import "src/disasters/fourCorners.del";
 
+import "src/hud/credits.del";
 import "src/hud/debug.del";
 import "src/hud/scoreboard.del";
 import "src/hud/textColor.del";
