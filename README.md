@@ -1,6 +1,6 @@
 <table align="center">
   <tr>
-    <th><h3>Survive the Disasters 2 🌋</h3></th>
+    <th><b>Survive the Disasters 2 🌋</b></th>
   </tr>
 </table>
 <p align="center"> An Overwatch Workshop mode written in <a href="https://github.com/ItsDeltin/Overwatch-Script-To-Workshop"><b>📝OSTW</b></a>.</p>
