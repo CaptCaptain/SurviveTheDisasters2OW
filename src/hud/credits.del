@@ -7,6 +7,7 @@ class CreditsHud {
     }
     public static void destroy() {
         DestroyHudText(creditsText[0]);
+        creditsText = [];
     }
 }
 
