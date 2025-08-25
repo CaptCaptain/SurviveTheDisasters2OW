@@ -2,7 +2,7 @@ class CreditsHud {
     public static Number[] creditsText = [];
     public static void setup() {
         LastCreated.wrap(() => {
-            CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce(TextColor.Gray(TX.getString("C0000000001F70D") + " | " + "Survive the Disasters 2" + "\n" + "By CaptCaptain " + TextColor.Green("[" + GameSettings.code + "]", "BF") + "\n" + "————————————————" + "\n" + "Learn Workshop:\nworkshop.codes/discord")), EvaluateOnce(""), Location.Right, -2, [Color.LimeGreen, Color.SkyBlue, Color.Orange, Color.Rose][RoundToInteger(TotalTimeElapsed() % 4, Rounding.Down)], EvaluateOnce(Color.White), EvaluateOnce(Color.White), HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
+            CreateHudText(AllPlayers(), EvaluateOnce(""), EvaluateOnce(TextColor.Gray(TX.getString("C0000000001F70D") + " | " + "Survive the Disasters 2" + "\n" + "By CaptCaptain " + TextColor.Green("[" + "Code" + "]", "BF") + "\n" + "————————————————" + "\n" + "Learn Workshop:\nworkshop.codes/discord")), EvaluateOnce(""), Location.Right, -2, [Color.LimeGreen, Color.SkyBlue, Color.Orange, Color.Rose][RoundToInteger(TotalTimeElapsed() % 4, Rounding.Down)], EvaluateOnce(Color.White), EvaluateOnce(Color.White), HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
         }, LastTextID(), CreditsHud.creditsText);
     }
     public static void destroy() {
