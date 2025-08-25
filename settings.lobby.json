@@ -6,23 +6,14 @@
     "Mode Name": "Survive the Disasters 2 (EN)",
     "Description": "",
     "Modes": {
+        "All": {
+            "Hero Limit": "Off",
+            "Limit Roles": "Off"
+        },
         "Team Deathmatch": {
             "Disabled Maps": ["Workshop Chamber", "Workshop Expanse Night", "Workshop Expanse", "Workshop Green Screen", "Workshop Expanse Night", "Workshop Island"],
             "Enable Perks": true,
             "Score To Win": 1
-        }
-    },
-    "Heroes": {
-        "Team 1": {
-            "Mercy": {
-                "Resurrect Cooldown Time": 50
-            },
-            "Baptiste": {
-                "Immortality Field Cooldown Time": 50
-            },
-            "Lifeweaver": {
-                "Life Grip Cooldown Time": 75
-            }
         }
     },
     "Extensions": {

@@ -138,6 +138,20 @@ class Game {
         PlayEffect(deadPlayers[4], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[4].Position(), 10000);
         PlayEffect(deadPlayers[5], PlayEffect.DebuffImpactSound, Team.All, deadPlayers[5].Position(), 10000);
 
+        // Heal players and refresh their cooldowns
+        SetPlayerHealth(livingPlayers[0], MaxHealth(livingPlayers[0]));
+        SetPlayerHealth(livingPlayers[1], MaxHealth(livingPlayers[1]));
+        SetPlayerHealth(livingPlayers[2], MaxHealth(livingPlayers[2]));
+        SetPlayerHealth(livingPlayers[3], MaxHealth(livingPlayers[3]));
+        SetPlayerHealth(livingPlayers[4], MaxHealth(livingPlayers[4]));
+        SetPlayerHealth(livingPlayers[5], MaxHealth(livingPlayers[5]));
+
+        SetAbilityCooldown(livingPlayers, Button.PrimaryFire, 0);
+        SetAbilityCooldown(livingPlayers, Button.SecondaryFire, 0);
+        SetAbilityCooldown(livingPlayers, Button.Ability1, 0);
+        SetAbilityCooldown(livingPlayers, Button.Ability2, 0);
+        SetAbilityCooldown(livingPlayers, Button.Crouch, 0);
+
         Wait(3.5);
 
         if (currentRound >= GameSettings.maxRounds) {

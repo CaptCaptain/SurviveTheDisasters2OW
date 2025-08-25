@@ -20,6 +20,7 @@ if (EventPlayer().canSpawn)
 
 rule: '[player.del] Toggle Player Death in Round'
 Event.OnDeath Team.Team1
+if (currentGameState == GameState.ROUND)
 {
     EventPlayer().isDeadInRound = true;
 }

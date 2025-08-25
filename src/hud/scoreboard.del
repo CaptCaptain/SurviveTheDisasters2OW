@@ -93,13 +93,12 @@ if (isPlayer(EventPlayer()))
 }
 
 rule: '[hud/scoreboard.del] Update Scoreboard on Death'
-Event.OngoingPlayer Team.Team1
+Event.OnDeath Team.Team1
 if (isPlayer(EventPlayer()))
-if (EventPlayer().isDeadInRound)
 {
     Scoreboard.died();
     WaitUntil(IsAlive(EventPlayer()), 9999);
     Scoreboard.heroChanged(EventPlayer());
-    WaitUntil(EventPlayer().isDeadInRound == false, 9999);
+    if (EventPlayer().isDeadInRound) WaitUntil(EventPlayer().isDeadInRound == false, 9999);
     Scoreboard.respawned();
 }
