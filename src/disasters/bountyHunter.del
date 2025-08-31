@@ -10,7 +10,7 @@ globalvar BountyHunterDisasterData BountyHunterDisaster = new BountyHunterDisast
 
 rule: '[disasters/bountyHunter.del] Bounty Hunter Disaster Setup'
 {
-    Disasters.registerDisaster(id: DisasterId.BOUNTY_HUNTER, name: "Bounty Hunter", color: Color.Aqua, icon: TX.getString("C0000000005F9BC"), type: DisasterType.bossHunt, duration: 60, excludedDisasters: [], pool: disasterPool);
+    Disasters.registerDisaster(id: DisasterId.BOUNTY_HUNTER, name: "Bounty Hunter", color: Color.Aqua, icon: TX.getString("C0000000005F9BC"), type: DisasterType.bossHunt, duration: 60, excludedDisasters: [], pool: bossHuntDisasterPool);
 }
 
 rule: '[disasters/bountyHunter.del] Bounty Hunter Disaster'

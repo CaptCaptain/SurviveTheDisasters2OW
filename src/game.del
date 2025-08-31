@@ -46,7 +46,7 @@ void addDisaster() "[game.del] Subroutine addDisaster" {
 }
 
 void addRandomDisaster() "[game.del] Subroutine addRandomDisaster" {
-    selectedDisaster = Disasters.getDisaster(disasterPool.Remove(activeDisasters).Random());
+    selectedDisaster = Disasters.getDisaster(disasterPool.Append(bossHuntDisasterPool).Remove(activeDisasters).Random());
     excludedDisasters.ModAppend(selectedDisaster.excludedDisasters);
 
     Boolean selectedDisasterIsExcluded = excludedDisasters.Contains(selectedDisaster.id);
