@@ -45,7 +45,11 @@ enum DisasterId {
     SUN_WARRIOR,
     PETAL,
     TRACK_AND_FIELD,
-    FOUR_CORNERS
+    FOUR_CORNERS,
+    REIN_INVASION,
+    BLACK_HOLE,
+    ALIEN_INVASION,
+    HOT_POTATO
 }
 
 class Disasters {
