@@ -12,8 +12,8 @@ import "src/enemy/main.del";
 
 import "src/disasters/main.del";
 import "src/disasters/nuclearBomb.del";
-// import "src/disasters/wave.del";
-// import "src/disasters/rain.del";
+import "src/disasters/wave.del";
+import "src/disasters/rain.del";
 import "src/disasters/bountyHunter.del";
 import "src/disasters/sunWarrior.del";
 import "src/disasters/trackAndField.del";
