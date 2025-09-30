@@ -4,6 +4,7 @@ import "src/txBypass.del";
 import "src/text.del";
 import "src/lastCreated.del";
 import "src/spawns.del";
+import "src/teleport.del";
 
 import "src/settings.del";
 
@@ -18,6 +19,9 @@ import "src/disasters/bountyHunter.del";
 import "src/disasters/sunWarrior.del";
 import "src/disasters/trackAndField.del";
 import "src/disasters/fourCorners.del";
+
+import "src/shops/main.del";
+import "src/shops/hero_select.del";
 
 import "src/hud/credits.del";
 import "src/hud/debug.del";

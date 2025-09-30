@@ -1,0 +1,32 @@
+playervar Teleport HeroSelectTeleport;
+
+rule: '[shops/hero_select.del] Create Shop'
+Event.OngoingGlobal
+if (IsGameInProgress())
+{
+    WaitUntil(SpawnPoints(Team.All)[Shop.HERO_SELECT] != null, 9999);
+    
+    shops[Shop.HERO_SELECT] = Shop.New(SpawnPoints(Team.All)[Shop.HERO_SELECT]);
+    Shop.CreateEffects(shops[Shop.HERO_SELECT]);
+
+    LogToInspector(shops[Shop.HERO_SELECT].getPosition());
+}
+
+rule: '[shops/hero_select.del] Force into Hero Select'
+Event.OngoingPlayer Team.Team1 Player.All
+if (IsButtonHeld(Button: Button.Interact))
+if (DistanceBetween(EventPlayer().Position(), shops[Shop.HERO_SELECT].getPosition()) < shops[Shop.HERO_SELECT].getRadius())
+{
+    HeroSelectTeleport = Teleport.New(EventPlayer().Position(), FacingDirectionOf(EventPlayer()));
+
+    Wait(0.016);
+    
+    SetAllowedHeroes(EventPlayer(), AllHeroes().Remove(HeroOf(EventPlayer())));
+    ResetHeroAvailability();
+
+    Wait(0.016);
+
+    WaitUntil(HasSpawned(EventPlayer()), 9999);
+
+    Teleport.For(EventPlayer(), HeroSelectTeleport);
+}

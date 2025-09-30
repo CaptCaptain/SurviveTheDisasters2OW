@@ -1,0 +1,14 @@
+single struct Teleport {
+    private Vector Position;
+    private Vector Facing;
+
+    public Vector getPosition(): Position;
+    public Vector getFacing(): Facing;
+
+    public static Teleport New(in Vector position, in Vector facing): { Position: position, Facing: facing };
+
+    public static void For(in Player player, in Teleport teleport) {
+        Teleport(player, teleport.getPosition());
+        SetFacing(player, teleport.getFacing());
+    }
+}

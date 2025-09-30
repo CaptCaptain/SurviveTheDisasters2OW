@@ -1,0 +1,18 @@
+single struct Shop {
+    private Number[] effects;
+    private Vector position;
+    private Number radius;
+
+    public Vector getPosition(): position;
+    public Number getRadius(): radius;
+
+    public static Number HERO_SELECT: 0;
+
+    public static Shop New(in Vector pos): { effects: [], position: pos, radius: 5};
+
+    public static void CreateEffects(ref Shop shop) {
+        shop.effects[shop.effects.Length] = CreateEffect(AllPlayers(), Effect.Ring, Color.LimeGreen, shop.getPosition(), shop.getRadius(), EffectRev.VisibleTo);
+    }
+}
+
+globalvar Shop[] shops = [];
